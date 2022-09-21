@@ -19,20 +19,6 @@ import { Vector3 } from "./helpers/Vector3";
 URL.stringToURL = (string, type) => `data:${type};base64,${btoa(string)}`;
 
 /**
- * Downnload action with any url
- * @param {*} url Any URL
- * @param {*} filename the downloaded file will have this name
- */
-function download(url, filename) {
-    var a = document.createElement("a");
-    a.download = filename || Date.now();
-    a.href = url;
-    document.documentElement.appendChild(a);
-    a.click();
-    a.remove();
-}
-
-/**
  * Creates style from Object
  * @param {{}} style 
  * @returns {void} No Return
@@ -51,99 +37,6 @@ CanvasRenderingContext2D.prototype.style = function(style) {
     }
 }
 
-/**
- * 
- * @param {Vector3} v1 
- * @param {Vector3} v2 
- * @returns {Vector3} Cross of two vectors
- */
-Vector3.cross = function (v1, v2) {
-    if (v1 instanceof Vector3 && v2 instanceof Vector3) {
-        var x = v1.y * v2.z - v1.z * v2.y;
-        var y = v1.z * v2.x - v1.x * v2.z;
-        var z = v1.x * v2.y - v1.y * v2.x;
-        return new Vector3(x, y, z);
-    }
-};
-
-/**
- * 
- * @param {Vector3} v1 
- * @param {Vector3} v2 
- * @returns 
- */
-Vector3.dot = function (v1, v2) {
-    if (v1 instanceof Vector3 && v2 instanceof Vector3) {
-        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-    }
-};
-
-export class Vertex extends Vector3 {
-
-}
-
-export class Position3D extends Vector3 {
-    constructor(x = new Number(), y = new Number(), z = new Number()) {
-        super(x, y, z);
-    }
-    set setX(x) {
-        this.x = x;
-    }
-    set setY(y) {
-        this.y = y;
-    }
-    set setZ(z) {
-        this.z = z;
-    }
-    toVector3() {
-        return new Vector3(this.x, this.y, this.z);
-    }
-    toObject(object = Geo3D, options = {}) {
-        options = Object.assign(options, this)
-        return new object(options);
-    }
-}
-
-Matrix3.rotate = function (angle = 0, x = 0, y = 0, z = 0) {
-    var result = new Matrix3();
-    result.setIdentity();
-
-    var cos = Math.cos(angle);
-    var sin = Math.sin(angle);
-    var omc = 1 - cos;
-
-    result.data[0 + 0 * 3] = x * omc + cos;
-    result.data[0 + 1 * 3] = y * x * omc + z * sin;
-    result.data[0 + 2 * 3] = x * z * omc - y * sin;
-
-    result.data[1 + 0 * 3] = x * y * omc - z * sin;
-    result.data[1 + 1 * 3] = y * omc + cos;
-    result.data[1 + 2 * 3] = y * z * omc + x * sin;
-
-    result.data[2 + 0 * 3] = x * z * omc + y * sin;
-    result.data[2 + 1 * 3] = y * z * omc - x * sin;
-    result.data[2 + 2 * 3] = z * omc + cos;
-
-    return result;
-};
-
-
-SineWave.yFromI = (x = new Number(), y = new Number(), i = new Number(), r = new Number(), f = new Number()) => {
-    return (y || 0) + Math.sin((i * Math.PI * f + x) / 180) * r;
-}
-
-Geo.prototype.to3D = function (y, perspective) {
-    let list = [];
-    const geo = new Geo3D(this.x, y, this.y, perspective);
-    for (const point of this.path) {
-        const v = new Vector3(point.x, y, point.y);
-        geo.add(v);
-        list.push(v);
-    }
-    const face = new Face(list);
-    geo.add(face);
-    return geo;
-};
 
 Document.prototype.create = function ({ element = new String() || new HTMLElement(), css = {}, attr = {}, children = new Array() }) {
     element = element instanceof HTMLElement ? element : typeof element === 'string' ? document.createElement(element) : null;

@@ -138,3 +138,16 @@ export class Geo {
         return JSON.stringify(Object.assign({}, this), ...ops);
     }
 }
+
+// Geo.prototype.to3D = function (y, perspective) {
+//     let list = [];
+//     const geo = new Geo3D(this.x, y, this.y, perspective);
+//     for (const point of this.path) {
+//         const v = new Vector3(point.x, y, point.y);
+//         geo.add(v);
+//         list.push(v);
+//     }
+//     const face = new Face(list);
+//     geo.add(face);
+//     return geo;
+// };

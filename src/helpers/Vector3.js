@@ -1,7 +1,7 @@
 import { Vector2 } from "./Vector2";
 import { Geo3D } from "../figues/Geo3D";
 
-export class Vector3 extends Vector2 {
+class Vector3 extends Vector2 {
     constructor(x = new Number(), y = new Number(), z = new Number()) {
         super(x, y);
         this.z = z;
@@ -64,3 +64,32 @@ export class Vector3 extends Vector2 {
         return this;
     }
 }
+
+/**
+ * 
+ * @param {Vector3} v1 
+ * @param {Vector3} v2 
+ * @returns {Vector3} Cross of two vectors
+ */
+ Vector3.cross = function (v1, v2) {
+    if (v1 instanceof Vector3 && v2 instanceof Vector3) {
+        var x = v1.y * v2.z - v1.z * v2.y;
+        var y = v1.z * v2.x - v1.x * v2.z;
+        var z = v1.x * v2.y - v1.y * v2.x;
+        return new Vector3(x, y, z);
+    }
+};
+
+/**
+ * 
+ * @param {Vector3} v1 
+ * @param {Vector3} v2 
+ * @returns 
+ */
+Vector3.dot = function (v1, v2) {
+    if (v1 instanceof Vector3 && v2 instanceof Vector3) {
+        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+    }
+};
+
+export { Vector3 };

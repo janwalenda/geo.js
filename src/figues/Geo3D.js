@@ -1,6 +1,6 @@
 import { Face } from "../helpers/Face";
 import { Geo } from "../shapes/Geo";
-import { Project } from "../functions/Project";
+import { Project } from "../functions/project";
 import { Vector3 } from "../helpers/Vector3";
 
 export class Geo3D extends Geo {
