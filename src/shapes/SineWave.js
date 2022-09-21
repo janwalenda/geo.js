@@ -1,7 +1,7 @@
 import { Geo } from "./Geo";
 import { Vector2 } from "../helpers/Vector2";
 
-export class SineWave extends Geo {
+class SineWave extends Geo {
     constructor({ x, y, r, resolution, rotate, frequency, start, end, close }) {
         super(x, y, rotate, close);
         this.start = start || 0;
@@ -20,3 +20,9 @@ export class SineWave extends Geo {
             this.path[this.length - 1].close = this.close;
     }
 }
+
+SineWave.yFromI = (x = new Number(), y = new Number(), i = new Number(), r = new Number(), f = new Number()) => {
+    return (y || 0) + Math.sin((i * Math.PI * f + x) / 180) * r;
+}
+
+export { SineWave };

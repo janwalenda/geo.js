@@ -1,6 +1,6 @@
 import { Vector3 } from "./Vector3";
 
-export class Matrix3 {
+class Matrix3 {
     constructor() {
         this.data = [];
         for (var i = 0; i < 9; i++) {
@@ -43,3 +43,28 @@ export class Matrix3 {
         }
     }
 }
+
+Matrix3.rotate = function (angle = 0, x = 0, y = 0, z = 0) {
+    var result = new Matrix3();
+    result.setIdentity();
+
+    var cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    var omc = 1 - cos;
+
+    result.data[0 + 0 * 3] = x * omc + cos;
+    result.data[0 + 1 * 3] = y * x * omc + z * sin;
+    result.data[0 + 2 * 3] = x * z * omc - y * sin;
+
+    result.data[1 + 0 * 3] = x * y * omc - z * sin;
+    result.data[1 + 1 * 3] = y * omc + cos;
+    result.data[1 + 2 * 3] = y * z * omc + x * sin;
+
+    result.data[2 + 0 * 3] = x * z * omc + y * sin;
+    result.data[2 + 1 * 3] = y * z * omc - x * sin;
+    result.data[2 + 2 * 3] = z * omc + cos;
+
+    return result;
+};
+
+export { Matrix3 };
