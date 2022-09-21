@@ -1,15 +1,28 @@
+/**
+ * @author Jan Walenda
+ * @license MIT
+ **/
+
 import { Face } from "./helpers/Face";
 import { Geo } from "./shapes/Geo";
 import { Geo3D } from "./figues/Geo3D";
 import { Matrix3 } from "./helpers/Matrix3";
 import { SineWave } from "./shapes/SineWave";
-import { Vector2 } from "./helpers/Vector2";
 import { Vector3 } from "./helpers/Vector3";
 
 /**
- * @author Jan Walenda
- **/
+ * @function URL.stringToURL()
+ * @param {*} string 
+ * @param {*} type 
+ * @returns {string} url
+ */
 URL.stringToURL = (string, type) => `data:${type};base64,${btoa(string)}`;
+
+/**
+ * Downnload action with any url
+ * @param {*} url Any URL
+ * @param {*} filename the downloaded file will have this name
+ */
 function download(url, filename) {
     var a = document.createElement("a");
     a.download = filename || Date.now();
@@ -19,7 +32,12 @@ function download(url, filename) {
     a.remove();
 }
 
-CanvasRenderingContext2D.prototype.style = function (style) {
+/**
+ * Creates style from Object
+ * @param {{}} style 
+ * @returns {void} No Return
+ */
+CanvasRenderingContext2D.prototype.style = function(style) {
     if (style) {
         for (var prop in style) {
             if (prop in this) {
@@ -33,7 +51,13 @@ CanvasRenderingContext2D.prototype.style = function (style) {
     }
 }
 
-Vector3.cross = function (v1 = new Vector3(), v2 = new Vector3()) {
+/**
+ * 
+ * @param {Vector3} v1 
+ * @param {Vector3} v2 
+ * @returns {Vector3} Cross of two vectors
+ */
+Vector3.cross = function (v1, v2) {
     if (v1 instanceof Vector3 && v2 instanceof Vector3) {
         var x = v1.y * v2.z - v1.z * v2.y;
         var y = v1.z * v2.x - v1.x * v2.z;
@@ -42,7 +66,13 @@ Vector3.cross = function (v1 = new Vector3(), v2 = new Vector3()) {
     }
 };
 
-Vector3.dot = function (v1 = new Vector3(), v2 = new Vector3()) {
+/**
+ * 
+ * @param {Vector3} v1 
+ * @param {Vector3} v2 
+ * @returns 
+ */
+Vector3.dot = function (v1, v2) {
     if (v1 instanceof Vector3 && v2 instanceof Vector3) {
         return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
     }
@@ -97,27 +127,6 @@ Matrix3.rotate = function (angle = 0, x = 0, y = 0, z = 0) {
     return result;
 };
 
-
-export class Circle extends Geo {
-    constructor({ resolution, x, y, r, start, end, rotate, close }) {
-        super(x, y, rotate, close);
-        this.resolution = resolution || 1;
-        this.r = r || 0;
-        this.rotate = rotate || 180;
-        this.start = start || 0;
-        this.end = end || 361;
-        for (var i = this.start; i < this.end; i += this.resolution) {
-            var p = new Vector2(
-                this.x + Math.cos((i * Math.PI) / 180) * this.r,
-                this.y + Math.sin((i * Math.PI) / 180) * this.r,
-                0,
-                i === 0,
-                i === this.end - 1
-            );
-            this.path.push(p);
-        }
-    }
-}
 
 SineWave.yFromI = (x = new Number(), y = new Number(), i = new Number(), r = new Number(), f = new Number()) => {
     return (y || 0) + Math.sin((i * Math.PI * f + x) / 180) * r;
