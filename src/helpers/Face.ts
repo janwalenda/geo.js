@@ -2,7 +2,8 @@ import { Vector3 } from "./Vector3";
 import { Project } from "..";
 
 export class Face {
-    constructor(vertices = [new Vector3()]) {
+    public vertices: Vector3[];
+    public constructor(vertices: Vector3[]) {
         this.vertices = vertices;
     }
     addVector2(vertex) {
