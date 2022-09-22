@@ -36,5 +36,7 @@
     "README.md",
     "src"
   ],
-  "devDependencies": {}
+  "devDependencies": {
+    "typescript": "^4.8.3"
+  }
 }
