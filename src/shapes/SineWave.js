@@ -1,4 +1,4 @@
-import { Geo } from "./Geo";
+import { Geo } from "./Geo2D";
 import { Vector2 } from "../helpers/Vector2";
 
 class SineWave extends Geo {

@@ -1,5 +1,5 @@
 import { Face } from "../helpers/Face";
-import { Geo } from "../shapes/Geo";
+import { Geo } from "../shapes/Geo2D";
 import { Project } from "../functions/project";
 import { Vector3 } from "../helpers/Vector3";
 
