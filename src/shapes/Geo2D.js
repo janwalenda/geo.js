@@ -2,7 +2,7 @@ import { Face } from "../helpers/Face";
 import { Vector2 } from "../helpers/Vector2";
 import { Path } from "./Path";
 
-export class Geo {
+export class Geo2D {
     constructor(x, y, rotate, close) {
         this.path = new Array();
         this.x = parseFloat(x || 0);

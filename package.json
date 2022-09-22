@@ -4,6 +4,9 @@
   "description": "A JS code for Creating 3D objects",
   "main": "./src/index.js",
   "type": "module",
+  "exports": {
+    "import": "./src/index.js"
+  },
   "scripts": {},
   "repository": {
     "type": "git",

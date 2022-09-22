@@ -1,5 +1,5 @@
-import { Geo } from "./Geo2D";
-import { Vector2 } from "../helpers/Vector2";
+import { Geo } from "./Geo2D.js";
+import { Vector2 } from "../helpers/Vector2.js";
 
 class SineWave extends Geo {
     constructor({ x, y, r, resolution, rotate, frequency, start, end, close }) {

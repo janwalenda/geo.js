@@ -1,7 +1,7 @@
-import { Face } from "../helpers/Face";
-import { Geo } from "../shapes/Geo2D";
-import { Project } from "../functions/project";
-import { Vector3 } from "../helpers/Vector3";
+import { Face } from "../helpers/Face.js";
+import { Geo } from "../shapes/Geo2D.js";
+import { Project } from "../functions/project.js";
+import { Vector3 } from "../helpers/Vector3.js";
 
 export class Geo3D extends Geo {
     faces = new Array();
@@ -64,7 +64,7 @@ export class Geo3D extends Geo {
         if (style) {
             for (var prop in style) {
                 if (prop in ctx) {
-                    if (typeof ctx[prop] === "funtion") {
+                    if (typeof ctx[prop] === "funtion.js") {
                         ctx[prop](style[prop]);
                     } else {
                         ctx[prop] = style[prop];
