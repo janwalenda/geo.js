@@ -2,11 +2,44 @@ import { Geo3D } from "./Geo3D";
 import { Triangle } from "../helpers/Triangle";
 import { Vector3 } from "../helpers/Vector3";
 
+interface IcoSphereOptions {
+    scale;
+    perspective;
+}
+
 export class IcoSphere extends Geo3D {
-    constructor({ scale = new Number(), vertices, perspective }) {
+    private indices: number[][];
+    private scale: number;
+    private _create(): void
+    {
+        for (let i = 0; i < this.indices.length; i++) {
+            const ind = this.indices[i];
+            const vertex0 = this.vertices[ind[0]], vertex1 = this.vertices[ind[1]], vertex2 = this.vertices[ind[2]];
+
+            const triangle = new Triangle(
+                new Vector3(vertex0.x, vertex0.y, vertex0.z),
+                new Vector3(vertex1.x, vertex1.y, vertex1.z),
+                new Vector3(vertex2.x, vertex2.y, vertex2.z),
+                this.scale
+            );
+
+            this.faces.push(triangle);
+        };
+        
+        let nt: any[];
+        for (let i = 0; i < +this.vertices; i++) {
+            for (const face of this.faces) {
+                if(face instanceof Triangle) nt.push(nt.concat(face.subdivide()));
+            }
+        }
+        this.faces = nt;
+    }
+
+    constructor({ scale, perspective }: IcoSphereOptions) {
         super(0, 0, 0, perspective);
-        var X = 0.525731112119133606;
-        var Z = 0.85065080835203993;
+        const X = 0.525731112119133606;
+        const Z = 0.85065080835203993;
+        this.scale = scale;
         this.vertices = [
             new Vector3(-X, 0.0, Z),
             new Vector3(X, 0.0, Z),
@@ -45,28 +78,7 @@ export class IcoSphere extends Geo3D {
             [7, 2, 11]
         ];
 
-        for (var i = 0; i < this.indices.length; i++) {
-            var ind = this.indices[i];
-            const vertex0 = this.vertices[ind[0]], vertex1 = this.vertices[ind[1]], vertex2 = this.vertices[ind[2]];
-
-            const t = new Triangle(
-                new Vector3(vertex0.x, vertex0.y, vertex0.z),
-                new Vector3(vertex1.x, vertex1.y, vertex1.z),
-                new Vector3(vertex2.x, vertex2.y, vertex2.z),
-                scale
-            );
-
-            this.faces.push(t);
-        };
-        if (vertices) {
-            var nt = [];
-            for (let i = 0; i < +vertices; i++) {
-                for (const f of this.faces) {
-                    nt = nt.concat(f.subdivide());
-                }
-            }
-            this.faces = nt;
-        }
+        this._create();
     }
 
 }

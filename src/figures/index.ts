@@ -1,4 +1,3 @@
-import { Geo3D } from './Geo3D';
 import { Cube } from './Cube';
 import { IcoSphere } from './IcoSphere';
 import { Plane } from './Plane';
