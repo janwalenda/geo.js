@@ -25,7 +25,7 @@ export class Line extends Geo2D {
         );
     }
     private _getB() {
-        var x = this.x + this.hw, y = this.y;
+        const x = this.x + this.hw, y = this.y;
         return new Vector2(
             Math.cos(this.theta) * (x - this.x) -
             Math.sin(this.theta) * (y - this.y) +

@@ -17,8 +17,8 @@ export class Geo2D {
     subdevide(value) { }
     
     // toSVGPath() {
-    //     var sin = "";
-    //     for (var i = 0, len = this.path.length; i < len; i++) {
+    //     const sin = "";
+    //     for (const i = 0, len = this.path.length; i < len; i++) {
     //         const point = this.path[i];
     //         const p = point.firstVector2 ? "M" : "L";
     //         sin += `${p}${point.x} ${point.y} `;
@@ -32,14 +32,14 @@ export class Geo2D {
     }
 
     toSVGVector2s() {
-        var tmp = "";
-        for (var point of this.path) {
+        let tmp = "";
+        for (const point of this.path) {
             tmp += `${point.x},${point.y} `;
         }
         return tmp;
     }
     randomize() {
-        var currentIndex = this.path.length, temporaryValue, randomIndex;
+        let currentIndex = this.path.length, temporaryValue, randomIndex;
         do {
             randomIndex = Math.floor(Math.random() * currentIndex);
             currentIndex -= 1;
@@ -52,36 +52,21 @@ export class Geo2D {
 
     translateX(x: number): void
     {
-        for (var point of this.path)
-            point.moveX(x);
+        for (const point of this.path) point.moveX(x);
     }
 
     translateY(y: number): void
     {
-        for (var point of this.path)
-            point.moveY(y);
+        for (const point of this.path) point.moveY(y);
     }
 
     each(call: (point: Vector2, index?: number) => void): void 
     {
-        for (var i = 0; i <= this.path.length; i++){
+        for (let i = 0; i <= this.path.length; i++){
             call(this.path[i], i);
         }
     }
-
-    fromElement(element) {
-        var rect = element.getBoundingClientRect();
-        for (var point of this.path) {
-            var clone = element.cloneNode(true);
-            clone.style.setProperty(
-                "transform",
-                `translate(${point.x}px, ${point.y}px)`
-            );
-            element.parentNode.appendChild(clone);
-        }
-        element.remove();
-    }
-
+    
     round(value) {
         value = value || 1;
         for (let point of this.path) {
@@ -102,7 +87,7 @@ export class Geo2D {
             if (!(geo instanceof Geo2D)) continue;
             const path = geo.path;
 
-            for (var i = 0, len = path.length; i < len; i++)
+            for (let i = 0, len = path.length; i < len; i++)
                 this.path.push(path[i]);
         }
         return this;
@@ -126,10 +111,10 @@ export class Geo2D {
     }
     toCanvas = function({ context, style }: { context: CanvasRenderingContext2D, style: {}}){
         const path = this.path;
-        for (var { x, y, close } of path) {
+        for (const { x, y, close } of path) {
                 context.beginPath();
                 if (style) {
-                    for (var prop in style) {
+                    for (const prop in style) {
                         if (prop in context) {
                             if (typeof context[prop] === "function") {
                                 context[prop](style[prop]);

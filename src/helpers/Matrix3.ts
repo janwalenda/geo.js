@@ -3,7 +3,7 @@ import { Vector3 } from "./Vector3";
 class Matrix3 {
     data = [];
     constructor() {
-        for (var i = 0; i < 9; i++) {
+        for (let i = 0; i < 9; i++) {
             this.data[i] = 0;
         }
     }
@@ -14,26 +14,26 @@ class Matrix3 {
     }
     multiplyVector3(v: Vector3) {
         if (v instanceof Vector3) {
-            var x = this.data[0 + 0 * 3] * v.x +
+            const x = this.data[0 + 0 * 3] * v.x +
                 this.data[1 + 0 * 3] * v.y +
                 this.data[2 + 0 * 3] * v.z;
-            var y = this.data[0 + 1 * 3] * v.x +
+            const y = this.data[0 + 1 * 3] * v.x +
                 this.data[1 + 1 * 3] * v.y +
                 this.data[2 + 1 * 3] * v.z;
-            var z = this.data[0 + 2 * 3] * v.x +
+            const z = this.data[0 + 2 * 3] * v.x +
                 this.data[1 + 2 * 3] * v.y +
                 this.data[2 + 2 * 3] * v.z;
 
             return new Vector3(x, y, z);
         }
     }
-    multiplyMatrix(mat: Vector3) {
+    public multiplyMatrix(mat: Matrix3) {
         if (mat instanceof Matrix3) {
-            var result = new Matrix3();
-            for (var y = 0; y < 3; y++) {
-                for (var x = 0; x < 3; x++) {
-                    var sum = 0;
-                    for (var e = 0; e < 3; e++) {
+            const result = new Matrix3();
+            for (let y = 0; y < 3; y++) {
+                for (let x = 0; x < 3; x++) {
+                    let sum = 0;
+                    for (let e = 0; e < 3; e++) {
                         sum += this.data[y + e * 3] * mat.data[e + x * 3];
                     }
                     result.data[y + x * 3] = sum;
@@ -44,12 +44,12 @@ class Matrix3 {
     }
 
     public static rotate(angle = 0, x = 0, y = 0, z = 0) {
-        var result = new Matrix3();
+        const result = new Matrix3();
         result.setIdentity();
     
-        var cos = Math.cos(angle);
-        var sin = Math.sin(angle);
-        var omc = 1 - cos;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const omc = 1 - cos;
     
         result.data[0 + 0 * 3] = x * omc + cos;
         result.data[0 + 1 * 3] = y * x * omc + z * sin;
