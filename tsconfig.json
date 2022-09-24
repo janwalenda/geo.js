@@ -1,10 +1,12 @@
 {
     "compilerOptions": {
-      "outDir": "./build",
+      "outFile": "./Geo.js",
+      "rootDir": "./src/",
+      "lib": ["es5", "es6", "dom"],
       "allowJs": true,
       "target": "ES5",
-      "module": "commonJS",
+      "module": "AMD",
       "moduleResolution": "node"
     },
-    "include": ["./src/**/*.ts"]
+    // "include": ["./src/**/*.ts"]
 }
