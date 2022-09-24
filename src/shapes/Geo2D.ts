@@ -5,14 +5,15 @@ export class Geo2D {
     protected path: Vector2[];
     public x: number;
     public y: number;
-    public rotate: number;
+    public rotation: number;
     public close: boolean;
-    constructor(x, y, rotate, close) {
-        this.x = parseFloat(x || 0);
-        this.y = parseFloat(y || 0);
-        this.rotate = rotate || null;
+    constructor(x: number, y: number, rotation?: number, close?: boolean) {
+        this.x = x;
+        this.y = y;
         this.close = close || false;
+        this.rotation = rotation || null;
     }
+
     subdevide(value) { }
     
     // toSVGPath() {
@@ -114,16 +115,16 @@ export class Geo2D {
         }
         return new Face(conv);
     }
-    setRotate(rotate, center) {
+    setRotation(rotation, center) {
         for (let point of this.path) {
             if (!(point instanceof Vector2)) continue;
             const r = this.getDistance(point, center);
-            const theta = rotate * Math.PI;
+            const theta = rotation * Math.PI;
             point.x = Math.cos(theta) * r;
             point.y = Math.sin(theta) * r;
         }
     }
-    toCanvas({ context, style }: { context: CanvasRenderingContext2D, style: {}}) {
+    toCanvas = function({ context, style }: { context: CanvasRenderingContext2D, style: {}}){
         const path = this.path;
         for (var { x, y, close } of path) {
                 context.beginPath();

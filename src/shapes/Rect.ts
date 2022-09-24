@@ -9,13 +9,13 @@ export class Rect extends Geo2D{
     private theta: number;
 
 
-    constructor({ width, height, x, y, rotate, close }) {
-        super(x, y, rotate, close);
+    constructor({ width, height, x, y, rotation, close }) {
+        super(x, y, rotation, close);
         this.width = width || 0;
         this.height = height || 0;
         this.halfWidth = this.width / 2;
         this.halfHeight = this.height / 2;
-        this.theta = (this.rotate * Math.PI) / 180;
+        this.theta = (this.rotation * Math.PI) / 180;
         this.path = [
             this._getA(), 
             this._getB(), 

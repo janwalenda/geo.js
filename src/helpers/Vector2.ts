@@ -19,7 +19,9 @@ export class Vector2 {
     public moveY(y: number) {
         this.y += y;
     }
-    public toVector3(y = new Number()) {
+    
+    public toVector3(y: number): Vector3 
+    {
         return new Vector3(this.x, y, this.y);
     }
 }

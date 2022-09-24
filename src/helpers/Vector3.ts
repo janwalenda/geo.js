@@ -1,34 +1,28 @@
 import { Vector2 } from "./Vector2";
-import { Geo3D } from "../figues/Geo3D";
 
 class Vector3 extends Vector2 {
-    constructor(x = new Number(), y = new Number(), z = new Number()) {
+    public z: number;
+    constructor(x: number, y: number, z: number) {
         super(x, y);
         this.z = z;
     }
-    midVector2(B = new Vector3()) {
+    midVector2(B: Vector3): Vector3 
+    {
         return new Vector3(B.x - this.x, B.y - this.y, B.z - this.z);
     }
-    distance(B) {
+
+    distance(B: Vector3): number
+    {
         return Math.sqrt(
-            Math.pow(B.x - this.x) + Math.pow(B.y - this.y) + Math.pow(B.z - this.z)
+            Math.pow(B.x - this.x, 2) + Math.pow(B.y - this.y, 2) + Math.pow(B.z - this.z, 2)
         );
     }
-    toGeometry(perspective = new Boolean()) {
-        perspective && perspective instanceof Boolean
-            ? (perspective = perspective)
-            : (perspective = true);
-        return new Geo3D(
-            this.midVector2().x,
-            this.midVector2().y,
-            this.midVector2().z,
-            perspective
-        );
-    }
+
     mag() {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
-    add(v = new Vector3()) {
+
+    add(v: Vector3) {
         if (v instanceof Vector3) {
             this.x += v.x;
             this.y += v.y;
@@ -36,7 +30,7 @@ class Vector3 extends Vector2 {
         }
         return this;
     }
-    subtract(v = new Vector3()) {
+    subtract(v: Vector3) {
         if (v instanceof Vector3) {
             this.x -= v.x;
             this.y -= v.y;
@@ -63,33 +57,36 @@ class Vector3 extends Vector2 {
         this.divide(this.mag());
         return this;
     }
-}
 
-/**
- * 
- * @param {Vector3} v1 
- * @param {Vector3} v2 
- * @returns {Vector3} Cross of two vectors
- */
- Vector3.cross = function (v1, v2) {
-    if (v1 instanceof Vector3 && v2 instanceof Vector3) {
-        var x = v1.y * v2.z - v1.z * v2.y;
-        var y = v1.z * v2.x - v1.x * v2.z;
-        var z = v1.x * v2.y - v1.y * v2.x;
+    /**
+     * 
+     * @param {Vector3} v1 
+     * @param {Vector3} v2 
+     * @returns {Vector3} Cross of two vectors
+     */
+    public static cross (v1: Vector3, v2: Vector3): Vector3 
+    {
+
+        const x = v1.y * v2.z - v1.z * v2.y;
+        const y = v1.z * v2.x - v1.x * v2.z;
+        const z = v1.x * v2.y - v1.y * v2.x;
         return new Vector3(x, y, z);
     }
-};
 
-/**
- * 
- * @param {Vector3} v1 
- * @param {Vector3} v2 
- * @returns 
- */
-Vector3.dot = function (v1, v2) {
-    if (v1 instanceof Vector3 && v2 instanceof Vector3) {
+    /**
+     * 
+     * @param {Vector3} v1 
+     * @param {Vector3} v2 
+     * @returns 
+     */
+    public static dot(v1: Vector3, v2: Vector3): number 
+    {
         return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
     }
-};
+
+}
+
+
+ 
 
 export { Vector3 };

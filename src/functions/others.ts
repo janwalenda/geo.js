@@ -4,21 +4,23 @@
  * @param {*} type 
  * @returns {string} url
  */
- URL.stringToURL = (string, type) => `data:${type};base64,${btoa(string)}`;
+const stringToURL = (string, type) => `data:${type};base64,${btoa(string)}`;
 
  /**
   * Creates style from Object
   * @param {{}} style 
   * @returns {void} No Return
   */
- CanvasRenderingContext2D.prototype.style = function(style) {
+ 
+ 
+ function style(ctx: CanvasRenderingContext2D, style: { [key: string]: string }) {
      if (style) {
-         for (var prop in style) {
-             if (prop in this) {
-                 if (typeof this[prop] === "funtion") {
-                     this[prop](style[prop]);
+         for (const prop in style) {
+             if (prop in ctx) {
+                 if (typeof ctx[prop] === "function") {
+                     ctx[prop](style[prop]);
                  } else {
-                     this[prop] = style[prop];
+                     ctx[prop] = style[prop];
                  }
              }
          }

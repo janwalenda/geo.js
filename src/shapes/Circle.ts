@@ -19,11 +19,11 @@ export class Circle extends Geo2D {
         }
     } 
 
-    constructor({ resolution, x, y, r, start, end, rotate, close }) {
-        super(x, y, rotate, close);
+    constructor({ resolution, x, y, r, start, end, rotation, close }) {
+        super(x, y, rotation, close);
         this.resolution = resolution || 1;
         this.r = r || 0;
-        this.rotate = rotate || 180;
+        this.rotation = rotation || 180;
         this.start = start || 0;
         this.end = end || 361;
         this._create();

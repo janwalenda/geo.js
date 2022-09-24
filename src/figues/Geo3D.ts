@@ -1,46 +1,56 @@
 import { Face } from "../helpers/Face";
-import { Geo } from "../shapes/Geo2D";
+import { Geo2D } from "../shapes/Geo2D";
 import { Project } from "../functions/project";
 import { Vector3 } from "../helpers/Vector3";
 
-export class Geo3D extends Geo {
-    faces = new Array();
-    vertices = new Array();
-    constructor(x = new Number(), y = new Number(), z = new Number(), perspective = new Boolean()) {
+export class Geo3D extends Geo2D {
+    protected faces: Face[];
+    protected vertices: Vector3[];
+    protected perspective: boolean;
+    public z: number;
+
+    constructor(x: number, y: number, z: number, perspective: boolean) {
         super(x, y);
+        delete this.toCanvas;
         delete this.path;
-        this.perspective = perspective;
-        this.z = parseFloat(z || 0);
+        this.z = z;
+        this.perspective = perspective; 
+
+
     }
-    set translateZ(z) {
+
+    translateZ(z) {
         for (const face of this.faces) {
             for (const vertex of face.vertices) {
                 vertex.z += z;
             }
         }
     }
-    set translateX(x) {
+    translateX(x) {
         for (const face of this.faces) {
             for (const vertex of face.vertices) {
                 vertex.x += x;
             }
         }
     }
-    set translateY(y) {
+    translateY(y) {
         for (const face of this.faces) {
             for (const vertex of face.vertices) {
                 vertex.y += y;
             }
         }
     }
-    add(element = new Vector3() || new Face()) {
+
+    add(element: Vector3 | Face) {
         if (element instanceof Face) {
             this.faces.push(element);
         } else if (element instanceof Vector3) {
             this.vertices.push(element);
         }
     }
-    rotate = function (theta, phi) {
+
+    public rotate(theta, phi): this 
+    {
         // Rotation matrix coefficients
         for (var M of this.vertices) {
             var ct = Math.cos(theta);
@@ -58,13 +68,14 @@ export class Geo3D extends Geo {
             M.z = sp * y + cp * z + this.z;
         }
         return this;
-    };
-    toCanvas(ctx, style) {
+    }
+
+    public toCanvas3D(ctx: CanvasRenderingContext2D, distance: number, style: { [property: string]: string }) {
         const dx = ctx.canvas.width / 2, dy = ctx.canvas.height / 2;
         if (style) {
-            for (var prop in style) {
+            for (const prop in style) {
                 if (prop in ctx) {
-                    if (typeof ctx[prop] === "funtion") {
+                    if (typeof ctx[prop] === "function") {
                         ctx[prop](style[prop]);
                     } else {
                         ctx[prop] = style[prop];
@@ -75,11 +86,11 @@ export class Geo3D extends Geo {
 
         for (var j = 0, n_faces = this.faces.length; j < n_faces; ++j) {
             var face = this.faces[j].vertices;
-            var P = Project(face[0], this.perspective);
+            var P = Project(face[0], this.perspective, distance);
             const path = new Path2D();
             path.moveTo(P.x + dx, -P.y + dy);
             for (var k = 1, n_vertices = face.length; k < n_vertices; ++k) {
-                P = Project(face[k], this.perspective);
+                P = Project(face[k], this.perspective, distance);
                 path.lineTo(P.x + dx, -P.y + dy);
             }
             path.closePath();

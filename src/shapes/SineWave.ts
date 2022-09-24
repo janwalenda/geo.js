@@ -6,7 +6,7 @@ interface SineWaveOptions{
     y: number;
     r: number;
     resolution: number;
-    rotate: number;
+    rotation: number;
     frequency: number;
     start: number;
     end: number;
@@ -31,7 +31,7 @@ class SineWave extends Geo2D {
     }
 
     constructor(options: SineWaveOptions) {
-        super(options.x, options.y, options.rotate, options.close);
+        super(options.x, options.y, options.rotation, options.close);
         this.start      = options.start || 0;
         this.end        = options.end || 360;
         this.resolution = options.resolution || 1;

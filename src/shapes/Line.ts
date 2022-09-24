@@ -5,11 +5,11 @@ export class Line extends Geo2D {
     public width: number;
     private hw: number;
     private theta: number;
-    constructor({ x, y, width, rotate }) {
-        super(x, y, rotate, false);
+    constructor({ x, y, width, rotation }) {
+        super(x, y, rotation, false);
         this.width = width || 0;
         this.hw = this.width / 2;
-        this.theta = (this.rotate * Math.PI) / 180;
+        this.theta = (this.rotation * Math.PI) / 180;
         this.path = [this._getA(), this._getB()];
     }
     private _getA() {

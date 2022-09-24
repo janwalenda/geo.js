@@ -2,8 +2,15 @@ import { Face } from "../helpers/Face";
 import { Geo3D } from "./Geo3D";
 import { Vector3 } from "../helpers/Vector3";
 
+interface CubeOption{ 
+    x: number, 
+    y: number, 
+    z: number, 
+    size: number, 
+    perspective: boolean, 
+}
 export class Cube extends Geo3D {
-    constructor({ x = new Number(), y = new Number(), z = new Number(), size = new Number(), perspective = new Boolean() }) {
+    constructor({ x, y, z, size, perspective }: CubeOption) {
         super(x, y, z, perspective);
 
         const d = size / 2;
