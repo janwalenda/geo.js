@@ -34,10 +34,10 @@ export class Triangle extends Face {
         const rotY = Matrix3.rotate(y, 0, 1, 0);
         const rotZ = Matrix3.rotate(z, 0, 0, 1);
 
-        const rot = rotZ.multiplyMatrix(rotY.multiplyMatrix(rotX));
-        this.pos1 = rot.multiplyVector3(this.pos1);
-        this.pos2 = rot.multiplyVector3(this.pos2);
-        this.pos3 = rot.multiplyVector3(this.pos3);
+        const rot = rotZ.multiplyMatrix(rotY.multiplyMatrix(rotX)!);
+        this.pos1 = rot?.multiplyVector3(this.pos1)!;
+        this.pos2 = rot?.multiplyVector3(this.pos2)!;
+        this.pos3 = rot?.multiplyVector3(this.pos3)!;
 
         this.avg = this.pos1.clone().add(this.pos2).add(this.pos3).divide(3);
 

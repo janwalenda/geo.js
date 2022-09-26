@@ -15,7 +15,7 @@ export class Rect extends Geo2D{
         this.height = height || 0;
         this.halfWidth = this.width / 2;
         this.halfHeight = this.height / 2;
-        this.theta = (this.rotation * Math.PI) / 180;
+        this.theta = (this.rotation! * Math.PI) / 180;
         this.path = [
             this._getA(), 
             this._getB(), 

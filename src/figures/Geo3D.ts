@@ -12,8 +12,7 @@ export class Geo3D extends Geo2D {
 
     constructor(x: number, y: number, z: number, perspective: boolean) {
         super(x, y);
-        delete this.toCanvas;
-        delete this.path;
+        if('toCanvas' in this) delete this.toCanvas;
         this.z = z;
         this.perspective = perspective; 
 

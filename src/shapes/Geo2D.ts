@@ -1,17 +1,40 @@
+import { runInThisContext } from "vm";
 import { Face } from "../helpers/Face";
 import { Vector2 } from "../helpers/Vector2";
+import { Vector3 } from "../helpers/Vector3";
 
 export class Geo2D {
-    protected path: Vector2[];
+    protected path: Vector2[] = [];
     public x: number;
     public y: number;
-    public rotation: number;
+    public rotation?: number;
     public close: boolean;
+    public toCanvas?: ({ context, style }: { context: CanvasRenderingContext2D, style: {}}) => void;
     constructor(x: number, y: number, rotation?: number, close?: boolean) {
         this.x = x;
         this.y = y;
         this.close = close || false;
-        this.rotation = rotation || null;
+        this.rotation = rotation || 0;
+
+        this.toCanvas = ({ context, style }: { context: CanvasRenderingContext2D, style: {}}): void => 
+        {
+            const path = this.path;
+            for (const { x, y, close } of path) {
+                    context.beginPath();
+                    if (style) {
+                        for (const prop in style) {
+                            if (prop in context) {
+                                if (typeof context[prop] === "function") {
+                                    context[prop](style[prop]);
+                                } else {
+                                    context[prop] = style[prop];
+                                }
+                            }
+                        }
+                    }
+                    context.moveTo(x, y);
+            }
+        }
     }
 
     subdevide(value) { }
@@ -66,7 +89,7 @@ export class Geo2D {
             call(this.path[i], i);
         }
     }
-    
+
     round(value) {
         value = value || 1;
         for (let point of this.path) {
@@ -94,37 +117,19 @@ export class Geo2D {
     }
 
     toFace(y) {
-        let conv = [];
+        let conv: Vector3[] = [];
         for (const p of this.path) {
             conv.push(p.toVector3(y));
         }
         return new Face(conv);
     }
-    setRotation(rotation, center) {
+    public setRotation(rotation, center) {
         for (let point of this.path) {
             if (!(point instanceof Vector2)) continue;
             const r = this.getDistance(point, center);
             const theta = rotation * Math.PI;
             point.x = Math.cos(theta) * r;
             point.y = Math.sin(theta) * r;
-        }
-    }
-    toCanvas = function({ context, style }: { context: CanvasRenderingContext2D, style: {}}){
-        const path = this.path;
-        for (const { x, y, close } of path) {
-                context.beginPath();
-                if (style) {
-                    for (const prop in style) {
-                        if (prop in context) {
-                            if (typeof context[prop] === "function") {
-                                context[prop](style[prop]);
-                            } else {
-                                context[prop] = style[prop];
-                            }
-                        }
-                    }
-                }
-                context.moveTo(x, y);
         }
     }
     toJSON(replacer?: (this: any, key: string, value: any) => any, space?: string | number): string

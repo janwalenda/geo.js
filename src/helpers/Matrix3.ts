@@ -1,7 +1,7 @@
 import { Vector3 } from "./Vector3";
 
 class Matrix3 {
-    data = [];
+    data: number[] = [];
     constructor() {
         for (let i = 0; i < 9; i++) {
             this.data[i] = 0;
