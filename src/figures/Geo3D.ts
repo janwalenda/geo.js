@@ -1,6 +1,6 @@
 import { Face } from "../helpers/Face";
-import { Geo2D } from "../shapes/Geo2D";
-import { Project } from "../functions/project";
+import { Geo2D } from "../classes/Geo2D";
+import { project } from "../functions/project";
 import { Vector3 } from "../helpers/Vector3";
 import { Triangle } from "../helpers/Triangle";
 
@@ -62,7 +62,8 @@ export class Geo3D extends Geo2D {
         return this;
     }
 
-    public toCanvas3D(ctx: CanvasRenderingContext2D, distance: number, style: { [property: string]: string }) {
+    public toCanvas3D(ctx: CanvasRenderingContext2D, distance: number, style: { [property: string]: string }): void 
+    {
         const dx = ctx.canvas.width / 2, dy = ctx.canvas.height / 2;
         if (style) {
             for (const prop in style) {
@@ -78,11 +79,11 @@ export class Geo3D extends Geo2D {
 
         for (let j = 0, n_faces = this.faces.length; j < n_faces; ++j) {
             const face = this.faces[j].vertices;
-            let P = Project(face[0], this.perspective, distance);
+            let P = project(face[0], this.perspective, distance);
             const path = new Path2D();
             path.moveTo(P.x + dx, -P.y + dy);
             for (let k = 1, n_vertices = face.length; k < n_vertices; ++k) {
-                P = Project(face[k], this.perspective, distance);
+                P = project(face[k], this.perspective, distance);
                 path.lineTo(P.x + dx, -P.y + dy);
             }
             path.closePath();

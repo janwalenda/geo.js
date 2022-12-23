@@ -1,5 +1,5 @@
 import { Vector3 } from "./Vector3";
-import { Project } from "../functions/Project";
+import { project } from "../functions/Project";
 
 export class Face {
     public vertices: Vector3[];

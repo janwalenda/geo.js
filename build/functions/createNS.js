@@ -1,28 +1,26 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     exports.createNS = void 0;
-    function createNS(_a) {
-        var ns = _a.ns, element = _a.element, attr = _a.attr, attrNS = _a.attrNS, children = _a.children, options = _a.options;
+    function createNS({ ns, element, attr, attrNS, children, options }) {
         element = element instanceof Element ? element : document.createElementNS(ns, element, options);
         if (attr) {
-            for (var key in attr) {
+            for (const key in attr) {
                 element.setAttribute(key, attr[key]);
             }
         }
         if (attrNS) {
-            for (var key in attrNS) {
+            for (const key in attrNS) {
                 element.setAttributeNS(null, key, attrNS[key]);
             }
         }
-        for (var key in arguments[0]) {
+        for (const key in arguments[0]) {
             if (key in element)
                 element[key] = arguments[0][key];
         }
         if (children) {
-            for (var _i = 0, children_1 = children; _i < children_1.length; _i++) {
-                var child = children_1[_i];
-                var childElement = this.createNS(ns, child);
+            for (const child of children) {
+                const childElement = this.createNS(ns, child);
                 element.appendChild(childElement);
             }
         }

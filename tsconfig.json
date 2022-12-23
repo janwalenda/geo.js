@@ -1,12 +1,12 @@
 {
     "compilerOptions": {
       "outDir": "build/",
-      "rootDir": "src/",
       "lib": ["es5", "es6", "dom"],
       "allowJs": false,
-      "target": "ES3",
+      "target": "ES2022",
       "module": "AMD",
-      "moduleResolution": "classic"
+      "moduleResolution": "classic",
+      "removeComments": true,
     },
-    "include": ["./src/**/*.ts"]
+    "include": ["./src/**/*.ts", "index.ts"]
 }

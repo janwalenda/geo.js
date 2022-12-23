@@ -5,9 +5,12 @@
   "main": "./src/index.js",
   "type": "module",
   "exports": {
-    "import": "./src/index.js"
+    "import": "./build/index.js"
   },
-  "scripts": {},
+  "scripts": {
+    "build": "tsc",
+    "prestart": "npm run build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/janwalenda/geo.git"

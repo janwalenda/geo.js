@@ -1,21 +1,21 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     exports.Face = void 0;
-    var Face = /** @class */ (function () {
-        function Face(vertices) {
+    class Face {
+        vertices;
+        constructor(vertices) {
             this.vertices = vertices;
         }
-        Face.prototype.addVector2 = function (vertex) {
+        addVector2(vertex) {
             this.vertices.push(vertex);
-        };
+        }
         // getCenter() {
         //     return new Vector3();
         // }
-        Face.prototype.toGeometry = function () {
+        toGeometry() {
             return;
-        };
-        return Face;
-    }());
+        }
+    }
     exports.Face = Face;
 });
