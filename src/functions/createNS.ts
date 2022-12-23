@@ -12,26 +12,32 @@ interface CreateNSOptions{
 }
 
 export function createNS({ ns, element, attr, attrNS, children, options }: CreateNSOptions) {
-    element = element instanceof Element ? element : document.createElementNS(ns, element, options);
+    let usedElement: Element;
+    if(element instanceof Element){
+        usedElement = element;
+    } else if(typeof element === "string"){
+        usedElement = document.createElementNS(ns, element, options);
+    }
+
     if (attr) {
         for (const key in attr) {
-            element.setAttribute(key, attr[key]);
+            usedElement.setAttribute(key, attr[key]);
         }
     }
     if (attrNS) {
         for (const key in attrNS) {
-            element.setAttributeNS(null, key, attrNS[key]);
+            usedElement.setAttributeNS(null, key, attrNS[key]);
         }
     }
     for (const key in arguments[0]) {
-        if (key in element)
-            element[key] = arguments[0][key];
+        if (key in usedElement)
+            usedElement[key] = arguments[0][key];
     }
     if (children) {
         for (const child of children) {
             const childElement = this.createNS(ns, child);
-            element.appendChild(childElement);
+            usedElement.appendChild(childElement);
         }
     }
-    return element;
+    return usedElement;
 }
