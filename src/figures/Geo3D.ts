@@ -4,16 +4,19 @@ import { project } from "../functions/project";
 import { Vector3 } from "../helpers/Vector3";
 import { Triangle } from "../helpers/Triangle";
 
-export class Geo3D extends Geo2D {
+export class Geo3D {
     protected faces: Face[] | Triangle[];
     protected vertices: Vector3[];
     protected perspective: boolean;
-    public z: number;
+    private _x: number;
+    private _y: number;
+    private _z: number;
 
     constructor(x: number, y: number, z: number, perspective: boolean) {
-        super(x, y);
         if('toCanvas' in this) delete this.toCanvas;
-        this.z = z;
+        this._x = x;
+        this._y = y;
+        this._z = z;
         this.perspective = perspective; 
 
 
@@ -51,13 +54,13 @@ export class Geo3D extends Geo2D {
             const sp = Math.sin(phi);
 
             // Rotation
-            const x = M.x - this.x;
-            const y = M.y - this.y;
-            const z = M.z - this.z;
+            const x = M.x - this._x;
+            const y = M.y - this._y;
+            const z = M.z - this._z;
 
-            M.x = ct * x - st * cp * y + st * sp * z + this.x;
-            M.y = st * x + ct * cp * y - ct * sp * z + this.y;
-            M.z = sp * y + cp * z + this.z;
+            M.x = ct * x - st * cp * y + st * sp * z + this._x;
+            M.y = st * x + ct * cp * y - ct * sp * z + this._y;
+            M.z = sp * y + cp * z + this._z;
         }
         return this;
     }

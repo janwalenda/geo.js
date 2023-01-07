@@ -1,9 +1,14 @@
 import { Vector3 } from "./Vector3";
 
+
+/**
+ * A <i>Vector2</i>
+ */
 export class Vector2 {
-    public x: number;
-    public y: number;
+    public x:      number;
+    public y:      number;
     public close?: boolean;
+
     constructor(x: number, y: number, close?: boolean) {
         this.x = x;
         this.y = y;

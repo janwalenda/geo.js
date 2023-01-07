@@ -26,49 +26,49 @@ export class Rect extends Geo2D{
             this.path[this._length() - 1].close = this.close;
     }
     private _getA() {
-        const x = this.x - this.halfWidth, y = this.y - this.halfHeight;
+        const x = this._x - this.halfWidth, y = this._y - this.halfHeight;
         return new Vector2(
-            Math.cos(this.theta) * (x - this.x) -
-            Math.sin(this.theta) * (y - this.y) +
-            this.x,
-            Math.sin(this.theta) * (x - this.x) +
-            Math.cos(this.theta) * (y - this.y) +
-            this.y
+            Math.cos(this.theta) * (x - this._x) -
+            Math.sin(this.theta) * (y - this._y) +
+            this._x,
+            Math.sin(this.theta) * (x - this._x) +
+            Math.cos(this.theta) * (y - this._y) +
+            this._y
         );
     }
 
     private _getB() {
-        const x = this.x + this.halfWidth, y = this.y - this.halfHeight;
+        const x = this._x + this.halfWidth, y = this._y - this.halfHeight;
         return new Vector2(
-            Math.cos(this.theta) * (x - this.x) -
-            Math.sin(this.theta) * (y - this.y) +
-            this.x,
-            Math.sin(this.theta) * (x - this.x) +
-            Math.cos(this.theta) * (y - this.y) +
-            this.y,
+            Math.cos(this.theta) * (x - this._x) -
+            Math.sin(this.theta) * (y - this._y) +
+            this._x,
+            Math.sin(this.theta) * (x - this._x) +
+            Math.cos(this.theta) * (y - this._y) +
+            this._y,
         );
     }
 
     private _getC() {
-        const x = this.x + this.halfWidth, y = this.y + this.halfHeight;
+        const x = this._x + this.halfWidth, y = this._y + this.halfHeight;
         return new Vector2(
-            Math.cos(this.theta) * (x - this.x) -
-            Math.sin(this.theta) * (y - this.y) +
-            this.x,
-            Math.sin(this.theta) * (x - this.x) +
-            Math.cos(this.theta) * (y - this.y) +
-            this.y
+            Math.cos(this.theta) * (x - this._x) -
+            Math.sin(this.theta) * (y - this._y) +
+            this._x,
+            Math.sin(this.theta) * (x - this._x) +
+            Math.cos(this.theta) * (y - this._y) +
+            this._y
         );
     }
     private _getD() {
-        const x = this.x - this.halfWidth, y = this.y + this.halfHeight;
+        const x = this._x - this.halfWidth, y = this._y + this.halfHeight;
         return new Vector2(
-            Math.cos(this.theta) * (x - this.x) -
-            Math.sin(this.theta) * (y - this.y) +
-            this.x,
-            Math.sin(this.theta) * (x - this.x) +
-            Math.cos(this.theta) * (y - this.y) +
-            this.y
+            Math.cos(this.theta) * (x - this._x) -
+            Math.sin(this.theta) * (y - this._y) +
+            this._x,
+            Math.sin(this.theta) * (x - this._x) +
+            Math.cos(this.theta) * (y - this._y) +
+            this._y
         );
     }
 }

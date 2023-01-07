@@ -5,21 +5,22 @@ import { Vector3 } from "../helpers/Vector3";
 
 export class Geo2D {
     protected path: Vector2[] = [];
-    public x: number;
-    public y: number;
+    protected _x: number;
+    protected _y: number;
     public rotation?: number;
     public close: boolean;
     public toCanvas?: ({ context, style }: { context: CanvasRenderingContext2D, style: {}}) => void;
+
     constructor(x: number, y: number, rotation?: number, close?: boolean) {
-        this.x = x;
-        this.y = y;
+        this._x = x;
+        this._y = y;
         this.close = close || false;
         this.rotation = rotation || 0;
 
         this.toCanvas = ({ context, style }: { context: CanvasRenderingContext2D, style: {}}): void => 
         {
             const path = this.path;
-            for (const { x, y, close } of path) {
+            for (const { x, y } of path) {
                     context.beginPath();
                     if (style) {
                         for (const prop in style) {

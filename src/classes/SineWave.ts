@@ -24,8 +24,8 @@ class SineWave extends Geo2D {
     {
         for (let i: number = this.start; i < this.end; i += this.resolution) {
             const x = i;
-            const y = this.y +
-                Math.sin((i * Math.PI * this.frequency + this.x) / 180) * this.r;
+            const y = this._y +
+                Math.sin((i * Math.PI * this.frequency + this._x) / 180) * this.r;
             this.path.push(new Vector2(x, y, false));
         }
     }
