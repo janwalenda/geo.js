@@ -3,6 +3,7 @@ import { Vector2 } from "../helpers/Vector2";
 import { CircleOptions } from "../types/CircleOptions";
 
 /**
+ * A geometry that represents a Circle
  * @class Circle
  * @extends Geo2D
  * @author Jan Walenda

@@ -1,5 +1,5 @@
-import { Vector2 } from "../helpers/Vector2";
-import { Vector3 } from "../helpers/Vector3";
+import { Vector2 } from "../classes/Vector2";
+import { Vector3 } from "../classes/Vector3";
 
 export function project(vertex: Vector3, perspective: boolean, distance: number): Vector2 
 {

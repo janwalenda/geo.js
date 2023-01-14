@@ -1,17 +1,6 @@
 import { Geo2D } from "./Geo2D";
 import { Vector2 } from "../helpers/Vector2";
-
-interface SineWaveOptions{
-    x: number;
-    y: number;
-    r: number;
-    resolution: number;
-    rotation: number;
-    frequency: number;
-    start: number;
-    end: number;
-    close: boolean;
-}
+import { SineWaveOptions } from "../types/SineWaveOptions";
 
 class SineWave extends Geo2D {
     public start: number;

@@ -1,6 +1,6 @@
-import { Face } from "../helpers/Face";
+import { Face } from "../classes/Face";
 import { Geo3D } from "./Geo3D";
-import { Vector3 } from "../helpers/Vector3";
+import { Vector3 } from "../classes/Vector3";
 
 export class UVSphere extends Geo3D {
     constructor({ x, y, z, radius, widthSegments, heightSegments, perspective }) {

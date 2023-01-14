@@ -1,8 +1,7 @@
-import { Face } from "../helpers/Face";
-import { Geo2D } from "../classes/Geo2D";
+import { Face } from "../classes/Face";
 import { project } from "../functions/project";
-import { Vector3 } from "../helpers/Vector3";
-import { Triangle } from "../helpers/Triangle";
+import { Vector3 } from "../classes/Vector3";
+import { Triangle } from "../classes/Triangle";
 
 export class Geo3D {
     protected faces: Face[] | Triangle[];

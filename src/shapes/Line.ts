@@ -2,15 +2,18 @@ import { Geo2D } from "./Geo2D";
 import { Vector2 } from "../helpers/Vector2";
 
 export class Line extends Geo2D {
-    public width: number;
-    private hw: number;
+    public width:  number;
+
+    private hw:    number;
     private theta: number;
+
     constructor({ x, y, width, rotation }) {
         super(x, y, rotation, false);
+        
         this.width = width || 0;
-        this.hw = this.width / 2;
+        this.hw    = this.width / 2;
         this.theta = (this.rotation * Math.PI) / 180;
-        this.path = [this._getA(), this._getB()];
+        this.path  = [this._getA(), this._getB()];
     }
     private _getA() {
         const x = this._x - this.hw, y = this._y;

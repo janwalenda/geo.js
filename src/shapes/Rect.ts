@@ -1,7 +1,7 @@
 import { Geo2D } from "./Geo2D";
 import { Vector2 } from "../helpers/Vector2";
 
-export class Rect extends Geo2D{
+export class Rect extends Geo2D {
     public width: number;
     public height: number;
     private halfWidth: number;
@@ -11,11 +11,11 @@ export class Rect extends Geo2D{
 
     constructor({ width, height, x, y, rotation, close }) {
         super(x, y, rotation, close);
-        this.width = width || 0;
-        this.height = height || 0;
-        this.halfWidth = this.width / 2;
+        this.width      = width || 0;
+        this.height     = height || 0;
+        this.halfWidth  = this.width / 2;
         this.halfHeight = this.height / 2;
-        this.theta = (this.rotation! * Math.PI) / 180;
+        this.theta = (this.rotation * Math.PI) / 180;
         this.path = [
             this._getA(), 
             this._getB(), 
