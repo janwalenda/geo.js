@@ -1,12 +1,19 @@
 {
-    "compilerOptions": {
-      "outFile": "./Geo.js",
-      "rootDir": "./src/",
-      "lib": ["es5", "es6", "dom"],
-      "allowJs": true,
-      "target": "ES5",
-      "module": "AMD",
-      "moduleResolution": "node"
-    },
-    // "include": ["./src/**/*.ts"]
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "moduleResolution": "Node",
+    "strict": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
 }

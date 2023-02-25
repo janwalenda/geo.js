@@ -1,10 +1,10 @@
 import { Geo3D } from "./Geo3D";
-import { Triangle } from "../helpers/Triangle";
-import { Vector3 } from "../helpers/Vector3";
+import { Triangle } from "../classes/Triangle";
+import { Vector3 } from "../classes/Vector";
 
 interface IcoSphereOptions {
-    scale;
-    perspective;
+    scale: number;
+    perspective: boolean;
 }
 
 export class IcoSphere extends Geo3D {
@@ -26,7 +26,7 @@ export class IcoSphere extends Geo3D {
             this.faces.push(triangle);
         };
         
-        let nt: any[];
+        let nt: any[] = [];
         for (let i = 0; i < +this.vertices; i++) {
             for (const face of this.faces) {
                 if(face instanceof Triangle) nt.push(nt.concat(face.subdivide()));

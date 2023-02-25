@@ -1,5 +1,5 @@
 import { Geo2D } from "./Geo2D";
-import { Vector2 } from "../helpers/Vector2";
+import { Vector2 } from "../classes/Vector";
 
 
 export class Path extends Geo2D {

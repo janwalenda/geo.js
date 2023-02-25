@@ -1,13 +1,5 @@
-import { Cube } from './Cube';
-import { IcoSphere } from './IcoSphere';
-import { Plane } from './Plane';
-import { Square } from './Square';
-import { UVSphere } from './UVSphere'; 
-
-export {
-    Cube,
-    IcoSphere,
-    Plane,
-    Square,
-    UVSphere,
-}
+export { Cube } from './Cube';
+export { IcoSphere } from './IcoSphere';
+export { Plane } from './Plane';
+export { Square } from './Square';
+export { UVSphere } from './UVSphere'; 
