@@ -1,4 +1,6 @@
-export type SineWaveOptions = {
+import { Style } from "../types";
+
+export interface SineWaveOptions {
     x: number;
     y: number;
     r: number;
@@ -8,4 +10,5 @@ export type SineWaveOptions = {
     start: number;
     end: number;
     close: boolean;
+    style: Style
 }

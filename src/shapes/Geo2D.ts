@@ -1,45 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vector2 } from "../classes/Vector";
-
-type IfEquals<X, Y, A, B> =
-    (<T>() => T extends X ? 1 : 2) extends
-    (<T>() => T extends Y ? 1 : 2) ? A : B;
-
-type WritableKeysOf<T> = {
-    [P in keyof T]: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P, never>
-}[keyof T];
-
-type WritablePart<T> = Pick<T, WritableKeysOf<T>>;
-
-interface ToCanvasOptions {
-    context: CanvasRenderingContext2D;
-    style: Partial<CanvasRenderingContext2D | Path2D>;
-}
-
-function styleCanvas(style: Partial<WritablePart<CanvasRenderingContext2D | Path2D>>, context: CanvasRenderingContext2D | Path2D): CanvasRenderingContext2D | Path2D {
-    let k: keyof Partial<WritablePart<CanvasRenderingContext2D | Path2D>>;
-    for(k in style){
-        if(!style.hasOwnProperty(k)) continue;
-
-        const value = style[k];
-
-        if(!value || typeof value === 'function') continue;
-
-        context[k] = value;
-    }
-    return context;
-}
-
-function isContext(context: any){
-    return context instanceof CanvasRenderingContext2D;
-}
-
-
+import { isContext } from "../helpers/isContext";
+import { styleCanvas } from "../helpers/styleCanvas";
+import { Style } from "../types";
 
 export class Geo2D {
     protected path: Vector2[] = [];
     protected _x: number;
     protected _y: number;
+    protected style: Style;
     public rotation: number;
     public close: boolean;
 
@@ -48,11 +17,11 @@ export class Geo2D {
         return index === 0;
     }
 
-    public drawCanvas({ context, style }: ToCanvasOptions): void {
+    public drawCanvas(context: CanvasRenderingContext2D): void {
         if(!isContext(context)) throw new Error('No Context!')
-        if (style) {
-            styleCanvas(style, context);
-        }
+    
+        styleCanvas(this.style, context);
+
         const path = new Path2D();
         for (const point of this.path) {
             if(this._isFirstPoint(this.path, point)){
@@ -65,11 +34,12 @@ export class Geo2D {
         context.stroke(path);
     }
 
-    constructor(x: number, y: number, rotation?: number, close?: boolean) {
+    constructor(x: number, y: number, style: Style, rotation?: number, close?: boolean) {
         this._x = x;
         this._y = y;
         this.close = close || false;
-
+        this.style = style;
+        
         rotation ??= 0;
         this.rotation = rotation;
     }

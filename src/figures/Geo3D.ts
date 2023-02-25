@@ -61,7 +61,7 @@ export class Geo3D {
         return this;
     }
 
-    public toCanvas3D(ctx: CanvasRenderingContext2D, distance: number, style: CanvasRenderingContext2D): void 
+    public drawCanvas(ctx: CanvasRenderingContext2D, distance: number, style: CanvasRenderingContext2D): void 
     {
         const dx = ctx.canvas.width / 2, dy = ctx.canvas.height / 2;
         if (style) {

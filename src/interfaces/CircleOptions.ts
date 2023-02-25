@@ -1,4 +1,5 @@
-export type CircleOptions = {
+import { Style } from "../types";
+export interface CircleOptions {
     resolution: number;
     x: number;
     y: number;
@@ -7,4 +8,5 @@ export type CircleOptions = {
     end?: number;
     rotation: number;
     close?: boolean;
+    style: Style
 };

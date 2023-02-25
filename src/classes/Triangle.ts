@@ -16,8 +16,8 @@ export class Triangle extends Face {
         this.pos2 = pos2.normalize().multiply(scale);
         this.pos3 = pos3.normalize().multiply(scale);
         this.scale = scale;
-        const v1 = this.pos1.clone().subtract(this.pos2);
-        const v2 = this.pos3.clone().subtract(this.pos2);
+        const v2 = this.pos1.clone().subtract(this.pos2);
+        const v1 = this.pos3.clone().subtract(this.pos2);
 
         this.avg = this.pos1.clone().add(this.pos2).add(this.pos3).divide(3);
 

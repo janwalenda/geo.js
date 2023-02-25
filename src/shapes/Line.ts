@@ -1,5 +1,6 @@
 import { Geo2D } from "./Geo2D";
 import { Vector2 } from "../classes/Vector";
+import { Style } from "../types";
 
 export class Line extends Geo2D {
     public width:  number;
@@ -7,13 +8,14 @@ export class Line extends Geo2D {
     private hw:    number;
     private theta: number;
 
-    constructor({ x, y, width, rotation }: {
+    constructor({ x, y, width, rotation, style }: {
         x: number,
         y: number,
         width: number,
         rotation: number,
+        style: Style
     }) {
-        super(x, y, rotation, false);
+        super(x, y, style, rotation, false);
         this.rotation ??= 0;
         this.width = width || 0;
         this.hw    = this.width / 2;

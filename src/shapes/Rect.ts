@@ -1,5 +1,6 @@
 import { Geo2D } from "./Geo2D";
 import { Vector2 } from "../classes/Vector";
+import { RectOptions } from "../interfaces";
 
 export class Rect extends Geo2D {
     public width: number;
@@ -9,15 +10,8 @@ export class Rect extends Geo2D {
     private theta: number;
 
 
-    constructor({ width, height, x, y, rotation, close }: {
-        width: number, 
-        height: number, 
-        x: number, 
-        y: number,
-        rotation: number,
-        close: boolean,
-    }) {
-        super(x, y, rotation, close);
+    constructor({ width, height, x, y, rotation, close, style }: RectOptions) {
+        super(x, y, style, rotation, close);
         this.width      = width || 0;
         this.height     = height || 0;
         this.halfWidth  = this.width / 2;

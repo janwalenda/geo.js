@@ -1,6 +1,6 @@
 import { Geo2D } from "./Geo2D";
 import { Vector2 } from "../classes/Vector";
-import { SineWaveOptions } from "../types/SineWaveOptions";
+import { SineWaveOptions } from "../interfaces";
 
 class SineWave extends Geo2D {
     public start: number;
@@ -20,7 +20,7 @@ class SineWave extends Geo2D {
     }
 
     constructor(options: SineWaveOptions) {
-        super(options.x, options.y, options.rotation, options.close);
+        super(options.x, options.y, options.style, options.rotation, options.close);
         this.start      = options.start || 0;
         this.end        = options.end || 360;
         this.resolution = options.resolution || 1;

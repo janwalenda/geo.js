@@ -1,6 +1,6 @@
 import { Geo2D } from "./Geo2D";
 import { Vector2 } from "../classes/Vector";
-import { CircleOptions } from "../types/CircleOptions";
+import { CircleOptions } from "../interfaces";
 
 /**
  * A geometry that represents a Circle
@@ -30,8 +30,18 @@ export class Circle extends Geo2D {
         }
     } 
 
-    constructor({ resolution, x, y, r, start, end, rotation, close }: CircleOptions) {
-        super(x, y, rotation, close);
+    constructor({ 
+        resolution,
+        x,
+        y,
+        r,
+        start,
+        end,
+        rotation,
+        close,
+        style 
+    }: CircleOptions) {
+        super(x, y, style, rotation, close);
         this.resolution = resolution;
         this.r = r || 0;
         this.rotation = rotation;
