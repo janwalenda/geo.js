@@ -12,6 +12,12 @@ const screen = new Screen(ScreenType.CANVAS).createScreen({
   resolution: 2,
 });
 
+const svgScreen = new Screen(ScreenType.SVG).createScreen({
+  width: view.getWidth(),
+  height: view.getHeight(),
+  resolution: 2,
+});
+
 const circle_1 = new Circle({
   x: view.getWidth(),
   y: view.getHeight(),
@@ -22,7 +28,6 @@ const circle_1 = new Circle({
   end: 360,
   close: true,
   style: {
-    fillStyle: '#ffffff',
     strokeStyle: '#000000',
     lineWidth: 20,
     textAlign: 'center',
@@ -57,3 +62,9 @@ if(screen.context instanceof CanvasRenderingContext2D){
   }
 }
 
+if(svgScreen.context instanceof SVGElement){
+  group.render(svgScreen.context);
+  if(app) {
+    app.appendChild(svgScreen.context);
+  }
+}

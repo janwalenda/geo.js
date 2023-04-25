@@ -26,10 +26,17 @@ export class Screen{
     }
 
     constructor(type: ScreenType){
+        let element: ScreenElement;
 
-        const element = create({
-            element: type,
-        }) as ScreenElement;
+        if(type === ScreenType.SVG){
+            element = create.NS('http://www.w3.org/2000/svg', {
+                element: 'svg',
+            }) as SVGElement;
+        } else {
+            element = create({
+                element: 'canvas',
+            }) as HTMLCanvasElement;
+        } 
 
         this._element = element;
     }

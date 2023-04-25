@@ -14,6 +14,10 @@ export class Group{
                 if(geo instanceof Geo2D){
                     geo.drawCanvas(renderer);
                 }
+            } else {
+                if(geo instanceof Geo2D){
+                    geo.drawSVG(renderer);
+                }
             }
         }
     }
