@@ -1,42 +1,15 @@
 {
   "name": "geo",
-  "version": "1.0.0",
-  "description": "A JS code for Creating 3D objects",
-  "main": "./src/index.js",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
-  "exports": {
-    "import": "./src/index.js"
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
-  "scripts": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/janwalenda/geo.git"
-  },
-  "keywords": [],
-  "author": "Jan Walenda",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/janwalenda/geo/issues"
-  },
-  "homepage": "https://github.com/janwalenda/geo#readme",
-  "dependencies": {
-    "jspm": "^2.0.0-beta.7"
-  },
-  "jspm": {
-    "files": [
-      "package.json",
-      "LICENSE",
-      "README.md"
-    ],
-    "directories": {}
-  },
-  "files": [
-    "LICENSE",
-    "package.json",
-    "README.md",
-    "src"
-  ],
   "devDependencies": {
-    "typescript": "^4.8.3"
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
   }
 }

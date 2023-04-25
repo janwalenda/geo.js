@@ -1,9 +1,17 @@
-import { Face } from "../helpers/Face";
+import { Face } from "../classes/Face";
 import { Geo3D } from "./Geo3D";
-import { Vector3 } from "../helpers/Vector3";
+import { Vector3 } from "../classes/Vector";
 
 export class Square extends Geo3D {
-    constructor({ x, y, z, sizeX, sizeY, sizeZ, perspective }) {
+    constructor({ x, y, z, sizeX, sizeY, sizeZ, perspective }: {
+        x: number;
+        y: number;
+        z: number;
+        sizeX: number;
+        sizeY: number;
+        sizeZ: number;
+        perspective: boolean;
+    }) {
         super(x, y, z, perspective);
         const dx = sizeX / 2;
         const dy = sizeY / 2;

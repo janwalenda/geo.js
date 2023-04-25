@@ -1,30 +1,98 @@
-import { Face } from "../helpers/Face";
-import { Vector2 } from "../helpers/Vector2";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Vector2 } from "../classes/Vector";
+import { create } from "../helpers";
+import { isContext } from "../helpers/isContext";
+import { styleCanvas } from "../helpers/styleCanvas";
+import { Style, WritablePart } from "../types";
+
+function stylePath(style: Style, element: SVGPathElement): void {
+    let k: keyof Partial<WritablePart<CanvasRenderingContext2D | Path2D>>;
+
+    for(k in style) {
+        const value = style[k] as string | number;
+        switch(k){
+            case "strokeStyle":
+                element.setAttributeNS(null, 'stroke', value);
+                break;
+            case "lineWidth":
+                element.setAttributeNS(null, 'stroke-width', value);
+                break;
+        }
+        console.log(k);
+    }
+}
 
 export class Geo2D {
-    protected path: Vector2[];
-    public x: number;
-    public y: number;
+    protected path: Vector2[] = [];
+    protected _x: number;
+    protected _y: number;
+    protected style: Style;
     public rotation: number;
     public close: boolean;
-    constructor(x: number, y: number, rotation?: number, close?: boolean) {
-        this.x = x;
-        this.y = y;
-        this.close = close || false;
-        this.rotation = rotation || null;
+
+    private _getPathString(): string {
+        const path = this.path;
+        let string = '';
+
+        for(const point of path) {
+            if(this._isFirstPoint(point)){
+                const pointString = `M${point.x},${point.y} `;
+                string += pointString;
+            } else {
+                const pointString = `L${point.x},${point.y} `;
+                string += pointString;
+            }
+        }
+
+        return string;
     }
 
-    subdevide(value) { }
-    
-    // toSVGPath() {
-    //     const sin = "";
-    //     for (const i = 0, len = this.path.length; i < len; i++) {
-    //         const point = this.path[i];
-    //         const p = point.firstVector2 ? "M" : "L";
-    //         sin += `${p}${point.x} ${point.y} `;
-    //     }
-    //     return sin;
-    // }
+    protected _isFirstPoint(vector: Vector2): boolean {
+        const index = this.path.indexOf(vector);
+        return index === 0;
+    }
+
+    public drawCanvas(context: CanvasRenderingContext2D): void {
+        if(!isContext(context)) throw new Error('No Context!')
+        
+        styleCanvas(this.style, context);
+
+        const pathstring = this._getPathString();
+        const path       = new Path2D(pathstring);
+
+        if(this.close) {
+            path.closePath();
+        }
+
+        context.stroke(path);
+    }
+
+    public drawSVG(svg: SVGElement): void {
+        const namespaceURI = 'http://www.w3.org/2000/svg';
+        const pathString   = this._getPathString();
+
+        
+        const path = create.NS(namespaceURI, {
+            element: 'path',
+            attrNS: {
+                d: pathString,
+            }
+        }) as SVGPathElement;
+
+        stylePath(this.style, path);
+        
+        svg.appendChild(path);
+    }
+
+    constructor(x: number, y: number, style: Style, rotation?: number, close?: boolean) {
+        this._x = x;
+        this._y = y;
+        this.close = close || false;
+        this.style = style;
+        
+        rotation ??= 0;
+        this.rotation = rotation;
+    }
 
     protected _length(): number
     {
@@ -38,53 +106,59 @@ export class Geo2D {
         }
         return tmp;
     }
+
     randomize() {
-        let currentIndex = this.path.length, temporaryValue, randomIndex;
+        let currentIndex = this.path.length;
+
+        let randomIndex:    number;
+        let temporaryValue: Vector2;
+
         do {
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex -= 1;
+            randomIndex    = Math.floor(Math.random() * currentIndex);
+            currentIndex  -= 1;
             temporaryValue = this.path[currentIndex];
+
             this.path[currentIndex] = this.path[randomIndex];
-            this.path[randomIndex] = temporaryValue;
-        } while (0 !== currentIndex);
+            this.path[randomIndex]  = temporaryValue;
+            
+        } while (currentIndex !== 0);
+        
         return this;
     }
 
-    translateX(x: number): void
-    {
+    translateX(x: number): void {
         for (const point of this.path) point.moveX(x);
     }
 
-    translateY(y: number): void
-    {
+    translateY(y: number): void {
         for (const point of this.path) point.moveY(y);
     }
 
-    each(call: (point: Vector2, index?: number) => void): void 
-    {
-        for (let i = 0; i <= this.path.length; i++){
+    each(call: (point: Vector2, index?: number) => void): void {
+        for (let i = 0; i <= this.path.length; i++) {
             call(this.path[i], i);
         }
     }
-    
-    round(value) {
-        value = value || 1;
-        for (let point of this.path) {
+
+    round(value: number) {
+        for (const point of this.path) {
             const x = parseFloat(point.x.toPrecision(value));
             const y = parseFloat(point.y.toPrecision(value));
             point.x = x;
             point.y = y;
         }
+
         return this;
     }
 
-    getDistance(p1, p2) {
+    getDistance(p1: Vector2, p2: { x: number; y: number; }) {
         return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
     }
 
     combine(...geos: Geo2D[]) {
         for (const geo of geos) {
             if (!(geo instanceof Geo2D)) continue;
+
             const path = geo.path;
 
             for (let i = 0, len = path.length; i < len; i++)
@@ -93,55 +167,19 @@ export class Geo2D {
         return this;
     }
 
-    toFace(y) {
-        let conv = [];
-        for (const p of this.path) {
-            conv.push(p.toVector3(y));
-        }
-        return new Face(conv);
-    }
-    setRotation(rotation, center) {
-        for (let point of this.path) {
+    public setRotation(rotation: number, center: any) {
+        for (const point of this.path) {
             if (!(point instanceof Vector2)) continue;
+
             const r = this.getDistance(point, center);
             const theta = rotation * Math.PI;
             point.x = Math.cos(theta) * r;
             point.y = Math.sin(theta) * r;
         }
     }
-    toCanvas = function({ context, style }: { context: CanvasRenderingContext2D, style: {}}){
-        const path = this.path;
-        for (const { x, y, close } of path) {
-                context.beginPath();
-                if (style) {
-                    for (const prop in style) {
-                        if (prop in context) {
-                            if (typeof context[prop] === "function") {
-                                context[prop](style[prop]);
-                            } else {
-                                context[prop] = style[prop];
-                            }
-                        }
-                    }
-                }
-                context.moveTo(x, y);
-        }
-    }
+
     toJSON(replacer?: (this: any, key: string, value: any) => any, space?: string | number): string
     {
         return JSON.stringify(Object.assign({}, this), replacer, space);
     }
 }
-
-// Geo.prototype.to3D = function (y, perspective) {
-//     let list = [];
-//     const geo = new Geo3D(this.x, y, this.y, perspective);
-//     for (const point of this.path) {
-//         const v = new Vector3(point.x, y, point.y);
-//         geo.add(v);
-//         list.push(v);
-//     }
-//     const face = new Face(list);
-//     geo.add(face);
-//     return geo;
-// };

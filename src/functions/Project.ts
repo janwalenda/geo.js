@@ -1,7 +1,7 @@
-import { Vector2 } from "../helpers/Vector2";
-import { Vector3 } from "../helpers/Vector3";
+import { Vector3, Vector2 } from "../classes/Vector";
 
-export function Project(vertex: Vector3, perspective: boolean, distance: number) {
+export function project(vertex: Vector3, perspective: boolean, distance: number): Vector2 
+{
     const d = distance || 400;
     const r = d / vertex.y;
     if (perspective === true) {

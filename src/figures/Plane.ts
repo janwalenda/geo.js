@@ -1,7 +1,14 @@
 import { Square } from "./Square";
 
 export class Plane extends Square {
-    constructor({ x, y, z, sizeX, sizeY, sizeZ, perspective }) {
+    constructor({ x, y, z, sizeX, sizeZ, perspective }: {
+        x: number;
+        y: number;
+        z: number;
+        sizeX: number;
+        sizeZ: number;
+        perspective: boolean;
+    }) {
         super({
             x: x,
             y: y,
