@@ -7,6 +7,7 @@ interface ScreenOptions {
     width: number;
     height: number;
     resolution: number;
+    target: HTMLElement;
 }
 
 export class Screen{
@@ -58,6 +59,8 @@ export class Screen{
         style.setProperty('height', `${options.height}px`);
 
         this._sizeScreen(element, options);
+
+        options.target.appendChild(element);
         return this;
     }
 

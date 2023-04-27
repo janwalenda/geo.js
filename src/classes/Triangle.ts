@@ -23,7 +23,7 @@ export class Triangle extends Face {
 
         this.normal = Vector3.cross(v2, v1);
         this.normal.normalize();
-        this.vertices = [this.pos1, this.pos2, this.pos3];
+        this.indices = [this.pos1, this.pos2, this.pos3];
     }
 
     /**
