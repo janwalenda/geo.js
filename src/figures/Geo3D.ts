@@ -9,6 +9,23 @@ export class Geo3D {
     protected _y: number;
     protected _z: number;
 
+    protected _getMidpoint(vertex1: Vector3, vertex2: Vector3) {
+        const x = (vertex1.x + vertex2.x) / 2;
+        const y = (vertex1.y + vertex2.y) / 2;
+        const z = (vertex1.z + vertex2.z) / 2;
+      
+        return new Vector3(x, y, z);
+    }
+
+    protected _normalize(vertex: Vector3) {
+        const length = Math.sqrt(vertex.x ** 2 + vertex.y ** 2 + vertex.z ** 2);
+        const x = vertex.x / length;
+        const y = vertex.y / length;
+        const z = vertex.z / length;
+      
+        return new Vector3(x, y, z); 
+    }
+
     constructor(x: number, y: number, z: number) {
         this._x = x;
         this._y = y;
