@@ -16,8 +16,12 @@ const sphere = new Sphere({
   x: 250,
   y: 250,
   z: 0,
-  radius: 240,
+  radius: 225,
+  widthSegments: 10,
+  heightSegments: 10
 });
+
+
 
 const context = screen.context as CanvasRenderingContext2D;
 

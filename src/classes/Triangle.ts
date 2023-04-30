@@ -2,16 +2,16 @@ import { Face } from "./Face";
 import { Matrix3 } from "./Matrix3";
 import { Vector3 } from "./Vector";
 
-export class Triangle extends Face {
+export class Triangle {
     public pos1: Vector3;
     public pos2: Vector3;
     public pos3: Vector3;
     public scale: number;
     public avg: Vector3;
     public normal: Vector3;
+    private _vertices: Vector3[] = [];
     
     constructor(pos1: Vector3, pos2: Vector3, pos3: Vector3, scale: number) {
-        super(new Array());
         this.pos1 = pos1.normalize().multiply(scale);
         this.pos2 = pos2.normalize().multiply(scale);
         this.pos3 = pos3.normalize().multiply(scale);
@@ -23,7 +23,7 @@ export class Triangle extends Face {
 
         this.normal = Vector3.cross(v2, v1);
         this.normal.normalize();
-        this.indices = [this.pos1, this.pos2, this.pos3];
+        this._vertices = [this.pos1, this.pos2, this.pos3];
     }
 
     /**

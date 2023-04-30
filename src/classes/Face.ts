@@ -1,3 +1,5 @@
+import { Vector3 } from "./Vector";
+
 export class Face {
     private _indices: number[];
 
