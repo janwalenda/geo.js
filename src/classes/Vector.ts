@@ -1,15 +1,13 @@
 export class Vector2 {
     public x:      number;
     public y:      number;
-    public close?: boolean;
 
-    constructor(x: number, y: number, close?: boolean) {
+    constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
-        this.close = close || false;
     }
-    public static fromObject({ x, y, close }: Vector2) {
-        return new Vector2(x, y, close);
+    public static fromObject({ x, y }: Vector2) {
+        return new Vector2(x, y);
     }
 
     public moveX(x: number) {
@@ -26,23 +24,28 @@ class Vector3 extends Vector2 {
         super(x, y);
         this.z = z;
     }
-    midVector2(B: Vector3): Vector3 
-    {
-        return new Vector3(B.x - this.x, B.y - this.y, B.z - this.z);
+
+    public static getMidpoint(vertex1: Vector3, vertex2: Vector3){
+        const x = (vertex1.x + vertex2.x) / 2;
+        const y = (vertex1.y + vertex2.y) / 2;
+        const z = (vertex1.z + vertex2.z) / 2;
+      
+        return new Vector3(x, y, z);
     }
 
-    distance(B: Vector3): number
-    {
+    public getDistance(B: Vector3): number {
         return Math.sqrt(
-            Math.pow(B.x - this.x, 2) + Math.pow(B.y - this.y, 2) + Math.pow(B.z - this.z, 2)
+            Math.pow(B.x - this.x, 2) + 
+            Math.pow(B.y - this.y, 2) + 
+            Math.pow(B.z - this.z, 2)
         );
     }
 
-    mag() {
+    public mag() {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
 
-    add(v: Vector3) {
+    public add(v: Vector3) {
         if (v instanceof Vector3) {
             this.x += v.x;
             this.y += v.y;
@@ -50,7 +53,8 @@ class Vector3 extends Vector2 {
         }
         return this;
     }
-    subtract(v: Vector3) {
+
+    public subtract(v: Vector3) {
         if (v instanceof Vector3) {
             this.x -= v.x;
             this.y -= v.y;
@@ -58,23 +62,33 @@ class Vector3 extends Vector2 {
         }
         return this;
     }
-    multiply(n = 0) {
+
+    public multiply(n: number = 0) {
         this.x *= n;
         this.y *= n;
         this.z *= n;
         return this;
     }
-    divide(n = 0) {
+
+    public divide(n = 0) {
         if (n != 0) {
             this.multiply(1 / n);
         }
         return this;
     }
-    clone() {
+
+    public clone() {
         return new Vector3(this.x, this.y, this.z);
     }
-    normalize() {
-        this.divide(this.mag());
+
+    public normalize(): Vector3 {
+        const vertex = this;
+        const length = Math.sqrt(vertex.x ** 2 + vertex.y ** 2 + vertex.z ** 2);
+
+        this.x = vertex.x / length;
+        this.y = vertex.y / length;
+        this.z = vertex.z / length;
+      
         return this;
     }
 
