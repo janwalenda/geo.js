@@ -31,6 +31,10 @@ class Vector3 extends Vector2 {
         return new Vector3(B.x - this.x, B.y - this.y, B.z - this.z);
     }
 
+    equals(other: Vector3): boolean {
+        return this.x === other.x && this.y === other.y && this.z === other.z;
+    }
+
     distance(B: Vector3): number
     {
         return Math.sqrt(
