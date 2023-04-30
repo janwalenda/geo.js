@@ -21,7 +21,7 @@ export class Geo3D {
         );
     }
 
-    protected _getEdges() {
+    protected _calculateEdges() {
 
         this.faces.forEach((face) => {
             if (!(face instanceof Face)) return;
