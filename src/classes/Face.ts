@@ -10,4 +10,10 @@ export class Face {
     public constructor(vertices: number[]) {
         this._indices = vertices;
     }
+
+    public getVertices(vertices: Vector3[]): Vector3[] {
+        return this.indices.map(index => {
+            return vertices[index];
+        });
+    }
 }

@@ -1,20 +1,26 @@
 import { Vector3 } from "./Vector";
 
 export class Edge {
-    vector1: Vector3;
-    vector2: Vector3;
-    constructor(v1: Vector3, v2: Vector3) {
+    vector1: number;
+    vector2: number;
+    constructor(v1: number, v2: number) {
       this.vector1 = v1;
       this.vector2 = v2;
     }
   
-    equals(other: Edge): boolean {
+    equals(vertices: Vector3[], other: Edge): boolean {
+        const vector1 = vertices[this.vector1];
+        const vector2 = vertices[this.vector2];
+        const otherVector1 = vertices[other.vector1];
+        const otherVector2 = vertices[other.vector2];
       return (
-            this.vector1.equals(other.vector1) && 
-            this.vector2.equals(other.vector2)
+            vector1.equals(otherVector1) && 
+            vector2.equals(otherVector2)
         ) || (
-            this.vector1.equals(other.vector2) && 
-            this.vector2.equals(other.vector1)
+            vector1.equals(otherVector2) && 
+            vector2.equals(otherVector1)
         );
     }
-  }
+
+
+}

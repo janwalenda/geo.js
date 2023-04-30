@@ -68,16 +68,16 @@ class Vector3 extends Vector2 {
         return this;
     }
 
-    public multiply(n: number = 0) {
-        this.x *= n;
-        this.y *= n;
-        this.z *= n;
+    public multiplyScalar(scalar: number = 0) {
+        this.x *= scalar;
+        this.y *= scalar;
+        this.z *= scalar;
         return this;
     }
 
     public divide(n = 0) {
         if (n != 0) {
-            this.multiply(1 / n);
+            this.multiplyScalar(1 / n);
         }
         return this;
     }
