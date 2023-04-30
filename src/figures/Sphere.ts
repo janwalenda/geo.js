@@ -75,7 +75,7 @@ export class Sphere extends Geo3D {
     constructor({ x, y, z, radius, widthSegments = 60, heightSegments = 30  }: SphereOptions) {
         super(x, y, z);
         this.latitudeSegments = widthSegments;
-        this.latitudeSegments = heightSegments;
+        this.longitudeSegments = heightSegments;
         this.radius = radius;
         this._calculateSphereVertices();
         this._calculateSphereFaces();
