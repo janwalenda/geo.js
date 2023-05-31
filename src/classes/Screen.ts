@@ -12,6 +12,8 @@ interface ScreenOptions {
 
 export class Screen{
     private _element: ScreenElement;
+    private _width: number = 0;
+    private _height: number = 0;
     
     private _sizeScreen(element: ScreenElement, options: ScreenOptions) {
         const width = options.width * options.resolution;
@@ -55,6 +57,9 @@ export class Screen{
         const element = this._element;
         const style = this._element.style;
 
+        this._width = options.width;
+        this._height = options.height;
+
         style.setProperty('width', `${options.width}px`);
         style.setProperty('height', `${options.height}px`);
 
@@ -62,6 +67,12 @@ export class Screen{
 
         options.target.appendChild(element);
         return this;
+    }
+
+    public refreshCanvas(): void {
+        if(this._element instanceof CanvasRenderingContext2D){
+            this._element.clearRect(0, 0, this._width, this._height);
+        }
     }
 
     public setWidth(width: number){

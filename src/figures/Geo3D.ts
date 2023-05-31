@@ -29,14 +29,11 @@ export class Geo3D {
                 const index1 = face.indices[i];
                 const index2 = face.indices[(i + 1) % face.indices.length];
 
-                const vector1 = this.vertices[index1];
-                const vector2 = this.vertices[index2];
-
-                const edge = new Edge(vector1, vector2);
+                const edge = new Edge(index1, index2);
 
                 let found = false;
                 for (let j = 0; j < this.edges.length; j++) {
-                    if (edge.equals(this.edges[j])) {
+                    if (edge.equals(this.vertices, this.edges[j])) {
                         found = true;
                         break;
                     }
@@ -47,6 +44,34 @@ export class Geo3D {
                 }
             }
         });
+    }
+
+    protected _forEdges(callback: (edgle: Edge, v1: Vector3, v2: Vector3, index: number) => void): void {
+        for(let i = 0; i < this.edges.length; i++) {
+            const edge: Edge = this.edges[i];
+            const vector1 = this.vertices[edge.vector1];
+            const vector2 = this.vertices[edge.vector2];
+            callback(edge, vector1, vector2, i);
+        }
+    }
+
+    protected _forFaces(callback: (face: Face, indices: number[], index: number) => void): void {
+        for(let i = 0; i < this.faces.length; i++) {
+            const face: Face = this.faces[i];
+            const indices = face.indices;
+            callback(face, indices, i);
+        }
+    }
+
+    protected _forVertices(callback: (vertex: Vector3, index: number) => void): void {
+        for(let i = 0; i < this.vertices.length; i++){
+            const vertex = this.vertices[i];
+            callback(vertex, i);
+        }
+    }
+
+    protected _vertex(index: number): Vector3 {
+        return this.vertices[index];
     }
 
     constructor(x: number, y: number, z: number) {
@@ -90,61 +115,13 @@ export class Geo3D {
     }
 
     simpleSubdivision(iterations: number) {
-        let vertices = this.vertices.slice(); // Kopieren Sie die ursprünglichen Eckpunkte in eine neue Array-Variable.
-        let faces = this.faces.slice();
         for (let i = 0; i < iterations; i++) {
-            const newVertices = vertices.slice(); // Kopieren Sie die ursprünglichen Eckpunkte in eine neue Array-Variable.
-            const newFaces = [];
-
-            for (const edge of this.edges) {
-                const v1 = vertices[edge.vector1] // Holen Sie sich die Eckpunkte, die mit diesem Edge verbunden sind.
-                const v2 = vertices[edge.vector2]
-                const mid = v1.clone().add(v2).multiplyScalar(0.5); // Berechnen Sie den Mittelpunkt des Edges.
-
-                newVertices.push(mid); // Fügen Sie den Mittelpunkt als neuen Eckpunkt hinzu.
-                const midIndex = newVertices.length - 1; // Der Index des neuen Eckpunkts.
-
-                for (const face of faces) {
-                    const v1Index = face.indices[0];
-                    const v2Index = face.indices[1];
-                    const v3Index = face.indices[2];
-
-                    if ((
-                            v1Index === edge.vector1 && 
-                            v2Index === edge.vector2
-                        ) || (
-                            v1Index === edge.vector2 && 
-                            v2Index === edge.vector1
-                        )) {
-
-                        // Wenn die beiden Eckpunkte des Edges Teil des ursprünglichen Face sind.
-                        // Erstellen Sie zwei neue Faces, indem Sie den Mittelpunkt des Edges mit dem dritten Eckpunkt des ursprünglichen Face verbinden.
-                        const face1 = new Face([v1Index, midIndex, v3Index]);
-                        const face2 = new Face([midIndex, v2Index, v3Index]);
-
-                        newFaces.push(face1);
-                        newFaces.push(face2);
-                    } else if ((v2Index === edge.vector1 && v3Index === edge.vector2) || (v2Index === edge.vector2 && v3Index === edge.vector1)) {
-                        // Wenn die beiden Eckpunkte des Edges Teil des ursprünglichen Face sind.
-                        // Erstellen Sie zwei neue Faces, indem Sie den Mittelpunkt des Edges mit dem ersten Eckpunkt des ursprünglichen Face verbinden.
-                        const face1 = new Face([v1Index, midIndex, v2Index]);
-                        const face2 = new Face([v1Index, v2Index, midIndex]);
-
-                        newFaces.push(face1);
-                        newFaces.push(face2);
-                    } else if ((v3Index === edge.vector1 && v1Index === edge.vector2) || (v3Index === edge.vector2 && v1Index === edge.vector1)) {
-                        // Wenn die beiden Eckpunkte des Edges Teil des ursprünglichen Face sind.
-                        // Erstellen Sie zwei neue Faces, indem Sie den Mittelpunkt des Edges mit dem zweiten Eckpunkt des ursprünglichen Face verbinden.
-                        const face1 = new Face([v2Index, midIndex, v1Index]);
-                        const face2 = new Face([v2Index, v1Index, midIndex]);
-
-                        newFaces.push(face1);
-                        newFaces.push(face2);
-                    }
-                }
-            }
-            this.faces = newFaces;
-            this.vertices = 
+            const newVertices = this.vertices.slice(); // Kopieren Sie die ursprünglichen Eckpunkte in eine neue Array-Variable.
+            const newFaces: Face[] = [];
+            this._forFaces((face, _, index) => {
+                const vertices = face.getVertices(this.vertices);
+                console.log(vertices)
+            })
         }
     }
 

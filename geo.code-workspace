@@ -3,10 +3,6 @@
 		{
 			"name": "geo",
 			"path": "."
-		},
-		{
-			"name": "geo.js",
-			"path": "../geo.js"
 		}
 	],
 	"settings": {}
