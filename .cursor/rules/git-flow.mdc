@@ -33,9 +33,14 @@ Auf `main` und `develop` wird **nie direkt committet** – nur gemergt.
 
 ### Namensregeln
 
-- `<nr>` ist fortlaufend (GEO-1, GEO-2, …). Nächste freie Nummer ermitteln:
-  `git branch -a | grep -oE 'GEO[-_][0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1`
-  (auch Merge-Commits in `git log --oneline develop` prüfen).
+- `<nr>` ist fortlaufend und eindeutig (GEO-1, GEO-2, …). Vergeben ist eine Nummer, sobald sie
+  in **irgendeinem** Branch (auch remote und gelöscht) oder Merge-Commit vorkommt. Höchste Nummer:
+  ```bash
+  { git ls-remote --heads origin; git branch -a; git log --all --format=%s; } \
+    | grep -oiE 'GEO[-_][0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1
+  ```
+  Bekannte Altlast: GEO-08 ist doppelt vergeben (`feature/GEO-08_Fixing_TS_Stuff` von 2022 und
+  `feature/GEO-08-workflow-rules`).
 - `<kurzname>` in kebab-case, englisch, knapp: `feature/GEO-12-math-core`.
 - Versionen folgen **SemVer**. Vor 1.0.0 dürfen Minor-Versionen brechende Änderungen enthalten.
 
