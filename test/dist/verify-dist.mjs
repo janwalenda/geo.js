@@ -26,5 +26,5 @@ check('require @janwalenda/geo', require('@janwalenda/geo'));
 check('import  @janwalenda/geo/min', await import('@janwalenda/geo/min'));
 
 const umd = { self: {} };
-vm.runInNewContext(readFileSync(new URL('../dist/geo.umd.min.js', import.meta.url), 'utf8'), umd);
+vm.runInNewContext(readFileSync(new URL('../../dist/geo.umd.min.js', import.meta.url), 'utf8'), umd);
 check('UMD     window.Geo', umd.self.Geo ?? umd.Geo);
