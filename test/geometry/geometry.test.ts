@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { Vec3 } from '../math';
+import { Vec3 } from '../../src/math';
 import {
     BoxGeometry, ConeGeometry, CylinderGeometry, Geometry, IcosahedronGeometry, OctahedronGeometry,
     ParametricGeometry, PlaneGeometry, TetrahedronGeometry, TorusGeometry, UVSphereGeometry,
-} from './index';
+} from '../../src/geometry/index';
 
 /** Every face normal points away from `insidePoint(faceCenter)`. */
 function expectOutward(g: Geometry, insidePoint: (center: Vec3) => Vec3 = () => new Vec3()): void {

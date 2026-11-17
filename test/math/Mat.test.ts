@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { expectArray, expectVec } from '../../test/helpers';
-import { Mat3, Mat4, Quat, Vec3, degToRad } from './index';
+import { expectArray, expectVec } from '../helpers';
+import { Mat3, Mat4, Quat, Vec3, degToRad } from '../../src/math/index';
 
 const identity4 = new Mat4();
 

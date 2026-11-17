@@ -45,7 +45,8 @@ Ein neuer Renderer braucht deshalb nur `draw(list)`.
 | `npm run test:dist` | Smoke-Test aller gebauten Einstiegspunkte (nach `build`) |
 
 Weitere Orte: `demo/` (Vite-Demo, Canvas und SVG nebeneinander, `?static` friert ein),
-`test/` (Test-Helfer, README-Beispiele), `scripts/verify-dist.mjs` (Bundle-Smoke-Test),
+`test/` (**alle** Tests, Struktur wie `src/`, plus Helfer, README-Beispiele und
+Bundle-Smoke-Test `test/dist/verify-dist.mjs`),
 `rollup.config.mjs` (Library-Build), `CHANGELOG.md` (Keep a Changelog).
 
 ## Leitplanken

@@ -58,9 +58,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p test",
     "build": "rollup -c",
-    "test:dist": "node scripts/verify-dist.mjs",
+    "test:dist": "node test/dist/verify-dist.mjs",
     "preview": "vite preview",
     "prepublishOnly": "npm run typecheck && npm run build && npm run test:dist",
     "test": "vitest run",
@@ -68,6 +68,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^1.0.2",
+    "@types/node": "^22.20.5",
     "esbuild": "^0.28.2",
     "jsdom": "^31.0.1",
     "rollup": "^4.68.4",
