@@ -8,6 +8,10 @@ export abstract class Camera extends Object3D {
     readonly projectionMatrix = new Mat4();
     /** World → view space (inverse of the world matrix). */
     readonly viewMatrix = new Mat4();
+    /** Distance of the near clipping plane (> 0). */
+    abstract near: number;
+    /** Distance of the far clipping plane. */
+    abstract far: number;
 
     /**
      * Recompute the projection matrix.
