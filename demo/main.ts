@@ -1,8 +1,8 @@
-import { Circle } from './shapes';
-import { view } from './helpers';
-import { Screen } from './classes';
-import { Group } from './classes/Group';
-import { ScreenType } from './types';
+import { Circle } from '../src/shapes';
+import { view } from '../src/helpers';
+import { Screen } from '../src/classes';
+import { Group } from '../src/classes/Group';
+import { ScreenType } from '../src/types';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
