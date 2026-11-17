@@ -1,0 +1,12 @@
+export { Color } from './Color';
+export type { ColorLike } from './Color';
+export { Material } from './Material';
+export type { MaterialOptions, Side } from './Material';
+export { Object3D } from './Object3D';
+export { Scene } from './Scene';
+export { Mesh } from './Mesh';
+export { Polyline } from './Polyline';
+export { Points } from './Points';
+export { Camera, OrthographicCamera, PerspectiveCamera } from './Camera';
+export type { OrthographicCameraOptions, PerspectiveCameraOptions } from './Camera';
+export { AmbientLight, DirectionalLight, Light, PointLight } from './Light';
