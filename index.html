@@ -4,10 +4,37 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/geo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Geo</title>
+    <title>geo.js demo</title>
+    <style>
+      :root { color-scheme: light dark; --bg: #f4f5f7; --panel: #ffffff; --text: #1d2330; --muted: #677086; --line: #dde1e8; }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #14171d; --panel: #1c2028; --text: #e6e9ef; --muted: #8b93a7; --line: #2c323d; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 14px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--text); }
+      main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+      h1 { font-size: 22px; margin: 0 0 4px; }
+      p { margin: 0 0 16px; color: var(--muted); }
+      .controls { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 16px; }
+      .controls label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+      .views { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+      figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+      figcaption { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+      figcaption span { color: var(--muted); font-variant-numeric: tabular-nums; }
+      .surface { display: block; width: 100%; aspect-ratio: 4 / 3; touch-action: none; cursor: grab; }
+      .surface > * { display: block; }
+    </style>
   </head>
-  <body style="margin: 0;">
-    <div id="app"></div>
+  <body>
+    <main>
+      <h1>geo.js</h1>
+      <p>One scene, one math pipeline, two renderers. Drag to orbit.</p>
+      <div class="controls" id="controls"></div>
+      <div class="views">
+        <figure><figcaption>Canvas 2D <span id="canvas-stats"></span></figcaption><div class="surface" id="canvas"></div></figure>
+        <figure><figcaption>SVG <span id="svg-stats"></span></figcaption><div class="surface" id="svg"></div></figure>
+      </div>
+    </main>
     <script type="module" src="/demo/main.ts"></script>
   </body>
 </html>
