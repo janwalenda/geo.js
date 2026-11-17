@@ -5,13 +5,19 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const require = createRequire(import.meta.url);
-const expected = ['Vector3', 'Matrix3', 'Screen', 'Group', 'Circle', 'Cube', 'ScreenType', 'project'];
+const expected = ['Vec3', 'Mat4', 'Quat', 'Scene', 'Mesh', 'BoxGeometry', 'PerspectiveCamera', 'compile', 'CanvasRenderer', 'SVGRenderer', 'toSVGString', 'Circle'];
 
 function check(name, mod) {
     const missing = expected.filter((key) => !(key in mod));
     if (missing.length) throw new Error(`${name}: missing exports ${missing.join(', ')}`);
-    const v = new mod.Vector3(3, 4, 0);
-    if (v.mag() !== 5) throw new Error(`${name}: Vector3.mag() is broken`);
+    // Render a cube to an SVG string: exercises math, scene, pipeline and serializer without a DOM.
+    const scene = new mod.Scene().add(new mod.Mesh(new mod.BoxGeometry()));
+    const camera = new mod.PerspectiveCamera();
+    camera.position.set(2, 2, 3);
+    camera.lookAt(new mod.Vec3());
+    const svg = mod.toSVGString(mod.compile(scene, camera, { width: 100, height: 100 }));
+    const faces = svg.match(/<polygon /g)?.length;
+    if (faces !== 3) throw new Error(`${name}: expected 3 visible cube faces, got ${faces}`);
     console.log(`ok  ${name} (${Object.keys(mod).length} exports)`);
 }
 

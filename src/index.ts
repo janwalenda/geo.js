@@ -12,38 +12,22 @@ export * from './math';
 export * from './scene';
 export * from './geometry';
 
+// 2D shapes
+export * from './shapes';
+
 // Render pipeline
 export * from './render';
 
 // Renderers (the only DOM-dependent layer)
 export * from './renderers';
 
-// Legacy API (superseded by the modules above, removed before 1.0)
+// Legacy 3D API (superseded by the modules above, removed before 1.0)
 export { Vector2, Vector3 } from './classes/Vector';
 export { Matrix3 } from './classes/Matrix3';
 export { Percent } from './classes/Percent';
 export { project } from './functions/Project';
-
-// Geometry primitives
 export { Face } from './classes/Face';
 export { Triangle } from './classes/Triangle';
-
-// Scene & output
-export { Screen } from './classes/Screen';
-export { Group } from './classes/Group';
-
-// 2D shapes
-export { Geo2D } from './shapes/Geo2D';
-export { Circle, Line, Rect, SineWave } from './shapes';
-
-// 3D figures
 export { Geo3D } from './figures/Geo3D';
 export { Cube, IcoSphere, Plane, Square, UVSphere } from './figures';
-
-// Helpers
 export { create, download, view } from './helpers';
-
-// Types
-export { ScreenType } from './types';
-export type { Style, StyleProps, CreateNSOptions } from './types';
-export type { CircleOptions, RectOptions, SineWaveOptions } from './interfaces';
