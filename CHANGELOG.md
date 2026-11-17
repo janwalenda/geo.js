@@ -7,6 +7,18 @@ versions may contain breaking changes).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-17
+
+Maintenance release with no changes to the public API.
+
+### Changed
+- Tests moved from `src/` to `test/`, mirroring the `src/` layout; a structure test enforces it
+- `@types/node` added as a dev dependency so the test TypeScript project type-checks
+- Project rules: commit identity, tests required for every feature/fix, branches pushed and CI green before merging, documented frozen legacy branches
+
+### Removed
+- `geo.code-workspace` is no longer tracked (local editor file, already in `.gitignore`)
+
 ## [0.1.0] - 2026-11-17
 
 Complete rewrite of the engine on a tested mathematical core.
@@ -31,5 +43,6 @@ Complete rewrite of the engine on a tested mathematical core.
 - SVG paths were filled black while canvas only stroked them
 - Wrong rotation matrices for arbitrary axes, flipped triangle normals after rotation, broken icosphere subdivision, and UV spheres without faces (all fixed by the rewrite)
 
-[Unreleased]: https://github.com/janwalenda/geo.js/compare/v0.1.0...develop
+[Unreleased]: https://github.com/janwalenda/geo.js/compare/v0.1.1...develop
+[0.1.1]: https://github.com/janwalenda/geo.js/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/janwalenda/geo.js/releases/tag/v0.1.0
