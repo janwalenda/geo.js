@@ -44,6 +44,20 @@ Auf `main` und `develop` wird **nie direkt committet** – nur gemergt.
 - `<kurzname>` in kebab-case, englisch, knapp: `feature/GEO-12-math-core`.
 - Versionen folgen **SemVer**. Vor 1.0.0 dürfen Minor-Versionen brechende Änderungen enthalten.
 
+## Legacy-Branches
+
+Eingefrorene Branches aus der Zeit vor v0.1.0. Sie bleiben zu Archivzwecken bestehen,
+enthalten eine `LEGACY.md` und werden **nie** gemergt, rebased oder weiterentwickelt –
+sie bauen auf der alten API auf, die mit v0.1.0 ersetzt wurde.
+
+| Branch                             | Stand      | Inhalt                                        |
+|------------------------------------|------------|-----------------------------------------------|
+| `feature/GEO-08_Fixing_TS_Stuff`   | 2023-01-14 | TS-Fixes/Refactoring der alten API            |
+| `feature/subdivide`                | 2023-05-31 | Unterteilung für `Geo3D` (alte API)           |
+
+Ideen daraus werden – falls gewünscht – in einem neuen `feature/GEO-<nr>-…` von `develop`
+neu umgesetzt. Neue Legacy-Branches: `LEGACY.md` committen und hier eintragen.
+
 ## Ablauf
 
 ```bash
