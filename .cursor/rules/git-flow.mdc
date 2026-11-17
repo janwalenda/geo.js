@@ -1,0 +1,93 @@
+---
+description: Git-Flow-Branching-Modell, Branch-Namen, Commits und Merges für geo.js
+globs:
+alwaysApply: true
+---
+
+# Git Flow – verbindlich für dieses Repository
+
+Dieses Projekt nutzt das klassische **Git-Flow-Modell** (Vincent Driessen).
+Jeder zusammenhängende Code entsteht auf einem eigenen Branch – nie direkt auf
+`main` oder `develop`.
+
+## Dauerhafte Branches
+
+| Branch    | Zweck                                                                 |
+|-----------|-----------------------------------------------------------------------|
+| `main`    | Nur veröffentlichte Versionen. Jeder Merge-Commit hat ein Tag `vX.Y.Z`. |
+| `develop` | Integrationszweig für die nächste Version. Immer grün (Typecheck, Tests, Build). |
+
+Auf `main` und `develop` wird **nie direkt committet** – nur gemergt.
+
+## Unterstützende Branches
+
+| Typ        | Abzweig von | Merge nach                     | Name                          | Wofür |
+|------------|-------------|--------------------------------|-------------------------------|-------|
+| Feature    | `develop`   | `develop`                      | `feature/GEO-<nr>-<kurzname>` | Neue Funktion, Refactoring, Tooling, Doku |
+| Bugfix     | `develop`   | `develop`                      | `bugfix/GEO-<nr>-<kurzname>`  | Fehler, der noch **nicht** veröffentlicht ist |
+| Release    | `develop`   | `main` **und** `develop`       | `release/<X.Y.Z>`             | Version vorbereiten: Versionsnummer, CHANGELOG, letzte Fixes |
+| Hotfix     | `main`      | `main` **und** `develop`*      | `hotfix/<X.Y.Z>`              | Dringender Fix einer veröffentlichten Version |
+| Support    | `main`      | –                              | `support/<X.Y>`               | Nur falls eine alte Major-Version gepflegt werden muss |
+
+\* Läuft gerade ein `release/*`-Branch, wird der Hotfix stattdessen dort hinein gemergt.
+
+### Namensregeln
+
+- `<nr>` ist fortlaufend (GEO-1, GEO-2, …). Nächste freie Nummer ermitteln:
+  `git branch -a | grep -oE 'GEO[-_][0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1`
+  (auch Merge-Commits in `git log --oneline develop` prüfen).
+- `<kurzname>` in kebab-case, englisch, knapp: `feature/GEO-12-math-core`.
+- Versionen folgen **SemVer**. Vor 1.0.0 dürfen Minor-Versionen brechende Änderungen enthalten.
+
+## Ablauf
+
+```bash
+# Feature starten
+git checkout develop && git pull
+git checkout -b feature/GEO-12-math-core
+
+# … committen …
+
+# Feature abschließen (immer --no-ff, damit der Branch in der Historie sichtbar bleibt)
+npm run typecheck && npm test && npm run build
+git checkout develop
+git merge --no-ff feature/GEO-12-math-core -m "Merge branch 'feature/GEO-12-math-core' into develop"
+git branch -d feature/GEO-12-math-core
+
+# Release
+git checkout -b release/0.2.0 develop
+npm version 0.2.0 --no-git-tag-version   # + CHANGELOG.md pflegen
+git commit -am "chore(release): 0.2.0"
+git checkout main    && git merge --no-ff release/0.2.0 && git tag -a v0.2.0 -m "v0.2.0"
+git checkout develop && git merge --no-ff release/0.2.0
+git branch -d release/0.2.0
+
+# Hotfix
+git checkout -b hotfix/0.2.1 main
+# … Fix + Versionsnummer + CHANGELOG …
+git checkout main    && git merge --no-ff hotfix/0.2.1 && git tag -a v0.2.1 -m "v0.2.1"
+git checkout develop && git merge --no-ff hotfix/0.2.1
+```
+
+Mit installiertem `git-flow`-CLI (AVH) gleichwertig: `git flow init -d`, dann
+`git flow feature start GEO-12-math-core` / `git flow feature finish …`,
+`git flow release start 0.2.0`, `git flow hotfix start 0.2.1`
+(Präfixe: `feature/`, `bugfix/`, `release/`, `hotfix/`, `support/`, Tag-Präfix `v`).
+
+## Commits
+
+- **Conventional Commits**, Betreff englisch im Imperativ, max. ~72 Zeichen:
+  `feat(math): add Mat4.lookAt`, `fix(svg): disable default fill`,
+  `refactor:`, `test:`, `docs:`, `build:`, `ci:`, `chore:`.
+- Brechende Änderungen: `feat!:` bzw. Footer `BREAKING CHANGE: …`.
+- Ein Commit = eine logische Änderung. Typecheck und Tests sollen nach jedem Commit grün sein.
+
+## Regeln für KI-Agenten (Claude Code, Cursor)
+
+- Vor jeder Änderung prüfen, auf welchem Branch du bist. Für neue Arbeit **immer**
+  einen passenden `feature/`- oder `bugfix/`-Branch von `develop` anlegen.
+  Zusammenhängender Code gehört in **einen** Branch; Unzusammenhängendes in getrennte.
+- Vor dem Merge nach `develop`: `npm run typecheck && npm test && npm run build` müssen grün sein.
+- **Nie** auf `main` pushen, Releases abschließen, Tags pushen oder `npm publish`
+  ausführen ohne ausdrückliche Freigabe des Nutzers.
+- **Nie** `develop` oder `main` force-pushen oder deren Historie umschreiben.
