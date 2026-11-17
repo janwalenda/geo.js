@@ -1,0 +1,341 @@
+import type { Mat4 } from '../math/Mat4';
+import { Vec2 } from '../math/Vec2';
+import { Vec3 } from '../math/Vec3';
+import { Vec4 } from '../math/Vec4';
+import type { Camera } from '../scene/Camera';
+import { Color } from '../scene/Color';
+import { AmbientLight, DirectionalLight, PointLight } from '../scene/Light';
+import type { Material } from '../scene/Material';
+import { Mesh } from '../scene/Mesh';
+import type { Object3D } from '../scene/Object3D';
+import { Points } from '../scene/Points';
+import { Polyline } from '../scene/Polyline';
+import { Scene } from '../scene/Scene';
+import type { DisplayList, Primitive, PrimitiveStyle } from './DisplayList';
+
+export interface CompileOptions {
+    /** Viewport width in CSS pixels. */
+    width: number;
+    /** Viewport height in CSS pixels. */
+    height: number;
+    /** Sort primitives back to front (painter's algorithm). Default `true`. */
+    sort?: boolean;
+    /**
+     * Width (px) of a hairline outline in the fill color that hides anti-aliasing
+     * seams between adjacent opaque faces. `0` disables it. Default `0.5`.
+     */
+    seams?: number;
+}
+
+interface Lights {
+    any: boolean;
+    ambient: Color;
+    directional: { direction: Vec3; color: Color }[];
+    point: { position: Vec3; color: Color }[];
+}
+
+interface Context {
+    view: Mat4;
+    projection: Mat4;
+    near: number;
+    far: number;
+    width: number;
+    height: number;
+    seams: number;
+    lights: Lights;
+}
+
+const BLACK = new Color(0, 0, 0);
+const clip = new Vec4();
+
+/**
+ * Run the pipeline: transform every visible object of `scene` into the view of
+ * `camera`, clip at the near plane, project, cull back faces, shade and sort.
+ * Pure function of its inputs – no DOM involved.
+ */
+export function compile(scene: Object3D, camera: Camera, options: CompileOptions): DisplayList {
+    const { width, height } = options;
+    camera.update(width / height);
+    scene.updateWorldMatrix(true);
+
+    const ctx: Context = {
+        view: camera.viewMatrix,
+        projection: camera.projectionMatrix,
+        near: camera.near,
+        far: camera.far,
+        width,
+        height,
+        seams: options.seams ?? 0.5,
+        lights: collectLights(scene),
+    };
+
+    const primitives: Primitive[] = [];
+    scene.traverseVisible((object) => {
+        if (object instanceof Mesh) compileMesh(object, ctx, primitives);
+        else if (object instanceof Polyline) compilePolyline(object, ctx, primitives);
+        else if (object instanceof Points) compilePoints(object, ctx, primitives);
+    });
+
+    // Array.prototype.sort is stable, so equal depths keep scene order.
+    if (options.sort !== false) primitives.sort((a, b) => b.depth - a.depth);
+
+    const background = scene instanceof Scene && scene.background ? scene.background.toCSS() : null;
+    return { width, height, background, primitives };
+}
+
+/**
+ * Screen position (CSS pixels) of a world-space point, or `null` if it lies
+ * behind the near plane. Useful for labels and hit testing.
+ */
+export function projectPoint(point: Vec3, camera: Camera, width: number, height: number): Vec2 | null {
+    camera.update(width / height);
+    const v = point.clone().applyMat4(camera.viewMatrix);
+    if (v.z > -camera.near) return null;
+    clip.set(v.x, v.y, v.z, 1).applyMat4(camera.projectionMatrix);
+    return new Vec2(((clip.x / clip.w + 1) / 2) * width, ((1 - clip.y / clip.w) / 2) * height);
+}
+
+function collectLights(scene: Object3D): Lights {
+    const lights: Lights = { any: false, ambient: new Color(0, 0, 0), directional: [], point: [] };
+    scene.traverseVisible((object) => {
+        if (object instanceof AmbientLight) {
+            lights.ambient.add(object.color.clone().scale(object.intensity));
+        } else if (object instanceof DirectionalLight) {
+            lights.directional.push({
+                direction: object.getDirectionToLight(),
+                color: object.color.clone().scale(object.intensity),
+            });
+        } else if (object instanceof PointLight) {
+            lights.point.push({
+                position: object.getWorldPosition(),
+                color: object.color.clone().scale(object.intensity),
+            });
+        } else {
+            return;
+        }
+        lights.any = true;
+    });
+    return lights;
+}
+
+function compileMesh(mesh: Mesh, ctx: Context, out: Primitive[]): void {
+    const { geometry, material } = mesh;
+    const world = geometry.vertices.map((v) => v.clone().applyMat4(mesh.worldMatrix));
+    const view = world.map((v) => v.clone().applyMat4(ctx.view));
+    const normal = new Vec3();
+    const center = new Vec3();
+
+    for (const face of geometry.faces) {
+        if (face.length < 3) continue;
+        newellNormal(world, face, normal);
+        if (normal.lengthSq() === 0) continue; // degenerate face
+
+        const polygon = face.map((i) => view[i]);
+        if (polygon.every((p) => p.z < -ctx.far)) continue;
+        const clipped = clipPolygonNear(polygon, ctx.near);
+        if (clipped.length < 3) continue;
+
+        const points = projectAll(clipped, ctx);
+        if (outsideViewport(points, ctx, material.lineWidth)) continue;
+
+        // NDC is y-up, screen is y-down: front faces (CCW) have a negative screen area.
+        const area = signedArea(points);
+        const front = area < 0;
+        if (material.side === 'front' && !front) continue;
+        if (material.side === 'back' && front) continue;
+        if (area === 0 && !material.stroke && !material.wireframe) continue; // edge-on
+
+        if (!front) normal.negate(); // light the visible side of double-sided faces
+        center.set(0, 0, 0);
+        for (const i of face) center.add(world[i]);
+        center.scale(1 / face.length);
+
+        out.push({
+            type: 'polygon',
+            points,
+            depth: averageDistance(clipped),
+            ...faceStyle(material, normal, center, ctx),
+        });
+    }
+}
+
+function compilePolyline(line: Polyline, ctx: Context, out: Primitive[]): void {
+    if (line.points.length < 2) return;
+    const view = line.points.map((p) => p.clone().applyMat4(line.worldMatrix).applyMat4(ctx.view));
+    const path = line.closed ? [...view, view[0]] : view;
+
+    // Split into continuous runs of segments that survive near-plane clipping.
+    const runs: Vec3[][] = [];
+    let run: Vec3[] = [];
+    for (let i = 0; i < path.length - 1; i++) {
+        const segment = clipSegmentNear(path[i], path[i + 1], ctx.near);
+        if (!segment) {
+            if (run.length) runs.push(run);
+            run = [];
+            continue;
+        }
+        if (run.length && !run[run.length - 1].equals(segment[0])) {
+            runs.push(run);
+            run = [];
+        }
+        if (!run.length) run.push(segment[0]);
+        run.push(segment[1]);
+    }
+    if (run.length) runs.push(run);
+
+    const style: PrimitiveStyle = {
+        fill: null,
+        stroke: (line.material.stroke ?? line.material.fill ?? BLACK).toCSS(),
+        lineWidth: line.material.lineWidth,
+        opacity: line.material.opacity,
+    };
+    const unclippedLoop = line.closed && runs.length === 1 && runs[0].length === path.length;
+    for (const r of runs) {
+        const points = unclippedLoop ? r.slice(0, -1) : r;
+        out.push({
+            type: 'polyline',
+            points: projectAll(points, ctx),
+            closed: unclippedLoop,
+            depth: averageDistance(points),
+            ...style,
+        });
+    }
+}
+
+function compilePoints(cloud: Points, ctx: Context, out: Primitive[]): void {
+    const { material } = cloud;
+    const fill = material.fill?.toCSS() ?? null;
+    const stroke = material.stroke?.toCSS() ?? null;
+    for (const p of cloud.positions) {
+        const v = p.clone().applyMat4(cloud.worldMatrix).applyMat4(ctx.view);
+        if (v.z > -ctx.near || v.z < -ctx.far) continue;
+        const [x, y] = projectAll([v], ctx);
+        out.push({
+            type: 'circle',
+            x,
+            y,
+            radius: material.pointSize,
+            depth: -v.z,
+            fill,
+            stroke,
+            lineWidth: material.lineWidth,
+            opacity: material.opacity,
+        });
+    }
+}
+
+function faceStyle(material: Material, normal: Vec3, center: Vec3, ctx: Context): PrimitiveStyle {
+    const opacity = material.opacity;
+    if (material.wireframe) {
+        return {
+            fill: null,
+            stroke: (material.stroke ?? material.fill ?? BLACK).toCSS(),
+            lineWidth: material.lineWidth,
+            opacity,
+        };
+    }
+    const base = material.fill;
+    const fill = base ? (material.lit ? shade(base, normal, center, ctx.lights) : base).toCSS() : null;
+    let stroke = material.stroke?.toCSS() ?? null;
+    let lineWidth = material.lineWidth;
+    if (!stroke && fill && base && base.a >= 1 && opacity >= 1 && ctx.seams > 0) {
+        stroke = fill;
+        lineWidth = ctx.seams;
+    }
+    return { fill, stroke, lineWidth, opacity };
+}
+
+/** Flat Lambert shading. Without any light in the scene the base color is used unchanged. */
+function shade(base: Color, normal: Vec3, center: Vec3, lights: Lights): Color {
+    if (!lights.any) return base;
+    const light = lights.ambient.clone();
+    for (const d of lights.directional) {
+        light.add(d.color.clone().scale(Math.max(0, normal.dot(d.direction))));
+    }
+    const toLight = new Vec3();
+    for (const p of lights.point) {
+        toLight.copy(p.position).sub(center).normalize();
+        light.add(p.color.clone().scale(Math.max(0, normal.dot(toLight))));
+    }
+    return base.clone().multiply(light).clamp();
+}
+
+/** Robust polygon normal (Newell's method), normalized. */
+function newellNormal(vertices: Vec3[], face: number[], out: Vec3): Vec3 {
+    out.set(0, 0, 0);
+    for (let i = 0; i < face.length; i++) {
+        const a = vertices[face[i]];
+        const b = vertices[face[(i + 1) % face.length]];
+        out.x += (a.y - b.y) * (a.z + b.z);
+        out.y += (a.z - b.z) * (a.x + b.x);
+        out.z += (a.x - b.x) * (a.y + b.y);
+    }
+    return out.normalize();
+}
+
+/** Sutherland–Hodgman against the near plane z = −near (view space, keep z ≤ −near). */
+function clipPolygonNear(polygon: Vec3[], near: number): Vec3[] {
+    const limit = -near;
+    if (polygon.every((p) => p.z <= limit)) return polygon;
+    const result: Vec3[] = [];
+    for (let i = 0; i < polygon.length; i++) {
+        const a = polygon[i];
+        const b = polygon[(i + 1) % polygon.length];
+        const aIn = a.z <= limit;
+        const bIn = b.z <= limit;
+        if (aIn) result.push(a);
+        if (aIn !== bIn) result.push(a.clone().lerp(b, (limit - a.z) / (b.z - a.z)));
+    }
+    return result;
+}
+
+function clipSegmentNear(a: Vec3, b: Vec3, near: number): [Vec3, Vec3] | null {
+    const limit = -near;
+    const aIn = a.z <= limit;
+    const bIn = b.z <= limit;
+    if (aIn && bIn) return [a, b];
+    if (!aIn && !bIn) return null;
+    const hit = a.clone().lerp(b, (limit - a.z) / (b.z - a.z));
+    return aIn ? [a, hit] : [hit, b];
+}
+
+/** View space → screen space (CSS pixels), returned as a flat [x0, y0, x1, y1, …] array. */
+function projectAll(points: Vec3[], ctx: Context): number[] {
+    const out = new Array<number>(points.length * 2);
+    for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        clip.set(p.x, p.y, p.z, 1).applyMat4(ctx.projection);
+        out[i * 2] = ((clip.x / clip.w + 1) / 2) * ctx.width;
+        out[i * 2 + 1] = ((1 - clip.y / clip.w) / 2) * ctx.height;
+    }
+    return out;
+}
+
+/** Shoelace formula on a flat point array. */
+function signedArea(points: number[]): number {
+    let area = 0;
+    const n = points.length / 2;
+    for (let i = 0; i < n; i++) {
+        const j = (i + 1) % n;
+        area += points[i * 2] * points[j * 2 + 1] - points[j * 2] * points[i * 2 + 1];
+    }
+    return area / 2;
+}
+
+function outsideViewport(points: number[], ctx: Context, margin: number): boolean {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (let i = 0; i < points.length; i += 2) {
+        minX = Math.min(minX, points[i]);
+        maxX = Math.max(maxX, points[i]);
+        minY = Math.min(minY, points[i + 1]);
+        maxY = Math.max(maxY, points[i + 1]);
+    }
+    return maxX < -margin || minX > ctx.width + margin || maxY < -margin || minY > ctx.height + margin;
+}
+
+/** Mean distance in front of the camera (positive). */
+function averageDistance(points: Vec3[]): number {
+    let sum = 0;
+    for (const p of points) sum -= p.z;
+    return sum / points.length;
+}

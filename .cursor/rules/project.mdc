@@ -1,0 +1,59 @@
+---
+description: Projektziel, Architektur und Befehle von geo.js
+globs:
+alwaysApply: true
+---
+
+# geo.js – Projektüberblick
+
+**Ziel:** Eine auf Mathematik basierende 3D-Engine (plus 2D-Formen) in TypeScript,
+die dieselbe Szene gleichwertig nach **Canvas 2D** und **SVG** rendert und als
+npm-Paket (`@janwalenda/geo`) sowie als minifiziertes Browser-Bundle ausgeliefert wird.
+
+## Architektur (Schichten, Abhängigkeiten nur nach unten)
+
+```
+src/math/       Vec2, Vec3, Vec4, Mat3, Mat4, Quat, utils     – rein, kein DOM
+src/scene/      Object3D, Scene, Mesh, Polyline, Points,        – rein, kein DOM
+                Camera (Perspective/Orthographic), Lights, Material, Color
+src/geometry/   Geometry + Generatoren (Box, Plane, UVSphere,   – rein, kein DOM
+                Tetra/Octa/Icosahedron, Torus, Cylinder, Cone,
+                Parametric)
+src/shapes/     2D-Formen (Shape2D: Circle, Rect, Ellipse,      – rein, kein DOM
+                Polygon, Line, FunctionGraph, ParametricCurve, …)
+src/render/     compile(): Szene + Kamera → DisplayList          – rein, kein DOM
+                (Transform → Near-Clipping → Projektion → Culling
+                 → Flat-Shading → Tiefensortierung)
+src/renderers/  CanvasRenderer, SVGRenderer, toSVGString,        – einzige Stelle mit DOM
+                animate()
+src/index.ts    öffentliche API (alles, was exportiert wird, ist API)
+```
+
+Kernidee: Geometrie zeichnet sich **nie selbst**. Die Pipeline erzeugt eine
+renderer-neutrale **DisplayList** aus 2D-Primitiven (`polygon`, `polyline`,
+`circle`) mit fertig aufgelösten Stilen; Renderer übersetzen nur noch diese Liste.
+Ein neuer Renderer braucht deshalb nur `draw(list)`.
+
+## Befehle
+
+| Befehl              | Zweck |
+|---------------------|-------|
+| `npm run dev`       | Demo (`index.html`, `demo/`) mit Vite-Dev-Server |
+| `npm run typecheck` | `tsc --noEmit` (strict) |
+| `npm test`          | Vitest einmalig; `npm run test:watch` im Watch-Modus |
+| `npm run build`     | Rollup: `dist/geo.js` (ESM), `geo.cjs`, `geo.min.js`, `geo.umd.min.js`, `geo.d.ts` |
+| `npm run test:dist` | Smoke-Test aller gebauten Einstiegspunkte (nach `build`) |
+
+Weitere Orte: `demo/` (Vite-Demo, Canvas und SVG nebeneinander, `?static` friert ein),
+`test/` (Test-Helfer, README-Beispiele), `scripts/verify-dist.mjs` (Bundle-Smoke-Test),
+`rollup.config.mjs` (Library-Build), `CHANGELOG.md` (Keep a Changelog).
+
+## Leitplanken
+
+- Schichten unterhalb von `src/renderers/` dürfen **kein** `document`, `window`,
+  Canvas- oder SVG-API verwenden – sie müssen in Node testbar sein.
+- Canvas und SVG müssen für dieselbe DisplayList **dasselbe Bild** liefern
+  (gleiche Füllung, Kontur, Linienbreite, Deckkraft, Reihenfolge).
+- Öffentliche API nur über `src/index.ts` exportieren; jede sichtbare Änderung im
+  Abschnitt `[Unreleased]` von `CHANGELOG.md` vermerken (im selben Feature-Branch).
+- Beispiele in `README.md` werden von `test/readme.test.ts` ausgeführt – bei API-Änderungen beide anpassen.

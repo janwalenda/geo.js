@@ -1,15 +1,80 @@
 {
-  "name": "geo",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@janwalenda/geo",
+  "version": "0.1.0",
+  "description": "A math-based 2D/3D engine that renders to Canvas and SVG.",
+  "keywords": [
+    "3d",
+    "2d",
+    "engine",
+    "geometry",
+    "math",
+    "canvas",
+    "svg",
+    "rendering"
+  ],
+  "author": "Jan Walenda",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/janwalenda/geo.js.git"
+  },
+  "homepage": "https://github.com/janwalenda/geo.js#readme",
+  "bugs": {
+    "url": "https://github.com/janwalenda/geo.js/issues"
+  },
   "type": "module",
+  "main": "./dist/geo.cjs",
+  "module": "./dist/geo.js",
+  "types": "./dist/geo.d.ts",
+  "unpkg": "./dist/geo.umd.min.js",
+  "jsdelivr": "./dist/geo.umd.min.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/geo.d.ts",
+        "default": "./dist/geo.js"
+      },
+      "require": {
+        "types": "./dist/geo.d.cts",
+        "default": "./dist/geo.cjs"
+      }
+    },
+    "./min": {
+      "types": "./dist/geo.d.ts",
+      "default": "./dist/geo.min.js"
+    },
+    "./umd": "./dist/geo.umd.min.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "typecheck": "tsc --noEmit",
+    "build": "rollup -c",
+    "test:dist": "node scripts/verify-dist.mjs",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run typecheck && npm run build && npm run test:dist",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "typescript": "^4.9.3",
-    "vite": "^4.1.0"
+    "@rollup/plugin-terser": "^1.0.2",
+    "esbuild": "^0.28.2",
+    "jsdom": "^31.0.1",
+    "rollup": "^4.68.4",
+    "rollup-plugin-dts": "^6.5.1",
+    "rollup-plugin-esbuild": "^6.2.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
   }
 }
