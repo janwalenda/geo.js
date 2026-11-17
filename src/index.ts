@@ -5,7 +5,10 @@
  * browser bundles. Everything exported here is public API.
  */
 
-// Math
+// Math core
+export * from './math';
+
+// Legacy API (superseded by the modules above, removed before 1.0)
 export { Vector2, Vector3 } from './classes/Vector';
 export { Matrix3 } from './classes/Matrix3';
 export { Percent } from './classes/Percent';
