@@ -67,11 +67,15 @@ git checkout -b feature/GEO-12-math-core
 
 # … committen …
 
-# Feature abschließen (immer --no-ff, damit der Branch in der Historie sichtbar bleibt)
+# Feature abschließen
 npm run typecheck && npm test && npm run build
-git checkout develop
+git push -u origin feature/GEO-12-math-core      # IMMER vor dem Merge pushen → CI läuft auf dem Branch
+# … CI-Lauf des Branches abwarten; bei Rot fixen und erneut pushen, nicht mergen …
+git checkout develop && git pull
 git merge --no-ff feature/GEO-12-math-core -m "Merge branch 'feature/GEO-12-math-core' into develop"
+git push origin develop
 git branch -d feature/GEO-12-math-core
+git push origin --delete feature/GEO-12-math-core   # Remote-Branch nach dem Merge aufräumen
 
 # Release
 git checkout -b release/0.2.0 develop
@@ -117,6 +121,11 @@ Mit installiertem `git-flow`-CLI (AVH) gleichwertig: `git flow init -d`, dann
 - **Kein Feature und kein Fix ohne Tests** – siehe `testing.mdc`. Ein `feature/`- oder `bugfix/`-Branch,
   der Code ändert, wird ohne passende neue/angepasste Tests nicht nach `develop` gemergt.
 - Vor dem Merge nach `develop`: `npm run typecheck && npm test && npm run build` müssen grün sein.
+- **Jeder `feature/`-, `bugfix/`- und `hotfix/`-Branch wird vor dem Merge gepusht**
+  (`git push -u origin <branch>`), damit er auf GitHub sichtbar ist und die CI darauf läuft.
+  Erst mergen, wenn der CI-Lauf des Branches grün ist. Gilt auch für reine Doku-/Regel-Branches.
+- Nach dem Merge den Branch lokal **und** remote löschen. Lässt die Umgebung das Löschen des
+  Remote-Branches nicht zu, den Nutzer darauf hinweisen statt es zu umgehen.
 - **Nie** auf `main` pushen, Releases abschließen, Tags pushen oder `npm publish`
   ausführen ohne ausdrückliche Freigabe des Nutzers.
 - **Nie** `develop` oder `main` force-pushen oder deren Historie umschreiben.
