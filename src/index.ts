@@ -15,6 +15,9 @@ export * from './geometry';
 // Render pipeline
 export * from './render';
 
+// Renderers (the only DOM-dependent layer)
+export * from './renderers';
+
 // Legacy API (superseded by the modules above, removed before 1.0)
 export { Vector2, Vector3 } from './classes/Vector';
 export { Matrix3 } from './classes/Matrix3';
