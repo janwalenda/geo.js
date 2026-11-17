@@ -3,22 +3,19 @@ import { Vector2 } from "../classes/Vector";
 import { create } from "../helpers";
 import { isContext } from "../helpers/isContext";
 import { styleCanvas } from "../helpers/styleCanvas";
-import { Style, WritablePart } from "../types";
+import { Style } from "../types";
 
 function stylePath(style: Style, element: SVGPathElement): void {
-    let k: keyof Partial<WritablePart<CanvasRenderingContext2D | Path2D>>;
+    const s = style as Record<string, unknown>;
 
-    for(k in style) {
-        const value = style[k] as string | number;
-        switch(k){
-            case "strokeStyle":
-                element.setAttributeNS(null, 'stroke', value);
-                break;
-            case "lineWidth":
-                element.setAttributeNS(null, 'stroke-width', value);
-                break;
-        }
-        console.log(k);
+    // Canvas only strokes paths, so SVG must not apply its default black fill.
+    element.setAttributeNS(null, 'fill', 'none');
+
+    if (typeof s.strokeStyle === 'string') {
+        element.setAttributeNS(null, 'stroke', s.strokeStyle);
+    }
+    if (typeof s.lineWidth === 'number') {
+        element.setAttributeNS(null, 'stroke-width', String(s.lineWidth));
     }
 }
 
