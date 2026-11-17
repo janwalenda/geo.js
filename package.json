@@ -61,15 +61,19 @@
     "build": "rollup -c",
     "test:dist": "node scripts/verify-dist.mjs",
     "preview": "vite preview",
-    "prepublishOnly": "npm run typecheck && npm run build && npm run test:dist"
+    "prepublishOnly": "npm run typecheck && npm run build && npm run test:dist",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^1.0.2",
     "esbuild": "^0.28.2",
+    "jsdom": "^31.0.1",
     "rollup": "^4.68.4",
     "rollup-plugin-dts": "^6.5.1",
     "rollup-plugin-esbuild": "^6.2.1",
     "typescript": "^5.9.3",
-    "vite": "^6.4.6"
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
   }
 }
