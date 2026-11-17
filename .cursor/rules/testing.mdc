@@ -1,6 +1,6 @@
 ---
 description: Testpflicht und Test-Konventionen (Vitest) für geo.js
-globs: **/*.test.ts, test/**/*
+globs: test/**/*
 alwaysApply: true
 ---
 
@@ -17,7 +17,7 @@ die dazugehörigen Tests. Ohne Tests kein Merge.
 | Bugfix / Hotfix                | Regressionstest, der **ohne den Fix fehlschlägt** und mit Fix grün ist |
 | Mathe / Geometrie              | bekannte Werte **und** Invarianten (siehe unten) |
 | Renderer / sichtbare Ausgabe   | jsdom-/Mock-Test der Ausgabe **plus** Browser-Check (Playwright): Canvas und SVG vergleichen, Screenshot ansehen |
-| Öffentliche API / README       | `test/readme.test.ts` bzw. `scripts/verify-dist.mjs` anpassen |
+| Öffentliche API / README       | `test/readme.test.ts` bzw. `test/dist/verify-dist.mjs` anpassen |
 | Refactoring ohne Verhaltensänderung | bestehende Tests bleiben unverändert grün; fehlende Abdeckung vorher ergänzen |
 
 Ausnahme: reine Doku-/Regel-/CI-Änderungen ohne Code – dort nur `npm test` grün halten.
@@ -27,8 +27,14 @@ Im Merge-/Commit-Text bzw. in der Antwort an den Nutzer nennen, welche Tests hin
 
 ## Konventionen
 
-- **Vitest**; Testdateien liegen neben dem Code: `src/math/Mat4.ts` → `src/math/Mat4.test.ts`.
-- Standard-Umgebung ist Node. Tests, die DOM brauchen (nur `src/renderers/`), setzen
+- **Alle Tests liegen im Ordner `test/`** – niemals in `src/`, `demo/` oder anderswo.
+  Die Struktur spiegelt `src/`: `src/math/Mat4.ts` → `test/math/Mat4.test.ts`,
+  `src/renderers/SVGRenderer.ts` → `test/renderers/svg.test.ts`.
+  `test/structure.test.ts` schlägt fehl, sobald eine Testdatei außerhalb von `test/` liegt;
+  Vitest führt ohnehin nur `test/**/*.test.ts` aus.
+- Gemeinsame Helfer in `test/helpers.ts`, Bundle-Smoke-Test in `test/dist/verify-dist.mjs`,
+  README-Beispiele in `test/readme.test.ts`. Imports auf den Code immer über `../../src/…`.
+- **Vitest**. Standard-Umgebung ist Node. Tests, die DOM brauchen (nur `test/renderers/`), setzen
   am Dateianfang `// @vitest-environment jsdom`.
 - Mathe immer gegen bekannte Werte **und** Eigenschaften testen
   (z. B. `M · M⁻¹ = I`, Rotation erhält Länge, Normalen zeigen nach außen).

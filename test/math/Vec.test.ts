@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { expectVec } from '../../test/helpers';
-import { Mat3, Mat4, Quat, Vec2, Vec3, Vec4 } from './index';
+import { expectVec } from '../helpers';
+import { Mat3, Mat4, Quat, Vec2, Vec3, Vec4 } from '../../src/math/index';
 
 describe('Vec2', () => {
     it('does basic arithmetic and chains', () => {

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { expectVec } from '../../test/helpers';
-import { Geometry } from '../geometry';
-import { Vec3 } from '../math';
+import { expectVec } from '../helpers';
+import { Geometry } from '../../src/geometry';
+import { Vec3 } from '../../src/math';
 import {
     Color, DirectionalLight, Material, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Scene,
-} from './index';
+} from '../../src/scene/index';
 
 describe('Color', () => {
     it('parses CSS hex, rgb(), named colors and numbers', () => {
