@@ -1,0 +1,16 @@
+---
+description: Test-Konventionen (Vitest) für geo.js
+globs: **/*.test.ts, test/**/*
+alwaysApply: false
+---
+
+# Tests
+
+- **Vitest**; Testdateien liegen neben dem Code: `src/math/Mat4.ts` → `src/math/Mat4.test.ts`.
+- Standard-Umgebung ist Node. Tests, die DOM brauchen (nur `src/renderers/`), setzen
+  am Dateianfang `// @vitest-environment jsdom`.
+- Mathe immer gegen bekannte Werte **und** Eigenschaften testen
+  (z. B. `M · M⁻¹ = I`, Rotation erhält Länge, Normalen zeigen nach außen).
+- Fließkomma mit `toBeCloseTo` bzw. dem Helfer `expectVec` vergleichen, nie mit `toBe`.
+- Jeder Bugfix bekommt einen Test, der ohne den Fix fehlschlägt.
+- `npm test` muss vor jedem Merge nach `develop` grün sein.

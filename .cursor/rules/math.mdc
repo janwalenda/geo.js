@@ -1,0 +1,27 @@
+---
+description: Mathematische Konventionen (Koordinatensystem, Matrizen, Winkel) der Engine
+globs: src/math/**/*.ts, src/scene/**/*.ts, src/geometry/**/*.ts, src/render/**/*.ts
+alwaysApply: false
+---
+
+# Mathematische Konventionen
+
+Diese Konventionen gelten überall – Abweichungen sind Bugs.
+
+- **Rechtshändiges Koordinatensystem**, `+Y` oben, `+X` rechts, die Kamera schaut entlang `-Z`
+  (wie OpenGL/WebGL).
+- **Winkel immer in Radiant.** Umrechnung nur über `degToRad` / `radToDeg`.
+  Einzige Ausnahme: `PerspectiveCamera.fov` (vertikal, in Grad, wie üblich).
+- **Matrizen spaltenweise (column-major)** in `elements` gespeichert:
+  `elements[col * 4 + row]`. Vektoren sind Spaltenvektoren: `v' = M · v`.
+  `a.multiply(b)` bedeutet `a = a · b` (b wird zuerst angewendet), `premultiply(b)` bedeutet `a = b · a`.
+- Transformationsreihenfolge eines Objekts: `M = T · R · S`.
+  Welt-Matrix: `world = parent.world · local`.
+- **Clip-Raum wie OpenGL:** NDC `x, y, z ∈ [-1, 1]`. Bildschirm: `x = (ndc.x + 1) / 2 · width`,
+  `y = (1 - ndc.y) / 2 · height` (Y wird gespiegelt).
+- **Vorderseite = gegen den Uhrzeigersinn (CCW)**, von außen betrachtet. Geometrie-Generatoren
+  müssen nach außen zeigende Normalen liefern (es gibt Tests dafür).
+- Vektor-/Matrix-Methoden **verändern `this`** und geben `this` zurück (verkettbar).
+  Wer das Original braucht, ruft vorher `.clone()` auf. Statische Helfer erzeugen neue Objekte.
+- Gleitkomma-Vergleiche nur mit Toleranz (`EPSILON = 1e-6`, `approxEqual`).
+- Keine Allokationen in heißen Schleifen der Pipeline, wenn ein Scratch-Objekt reicht.
