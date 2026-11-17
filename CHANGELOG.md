@@ -7,6 +7,8 @@ versions may contain breaking changes).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-17
+
 Complete rewrite of the engine on a tested mathematical core.
 
 ### Added
@@ -28,3 +30,6 @@ Complete rewrite of the engine on a tested mathematical core.
 - `tsc` failed on `Geo2D` style typing, so the project could not be built
 - SVG paths were filled black while canvas only stroked them
 - Wrong rotation matrices for arbitrary axes, flipped triangle normals after rotation, broken icosphere subdivision, and UV spheres without faces (all fixed by the rewrite)
+
+[Unreleased]: https://github.com/janwalenda/geo.js/compare/v0.1.0...develop
+[0.1.0]: https://github.com/janwalenda/geo.js/releases/tag/v0.1.0
