@@ -101,11 +101,21 @@ Mit installiertem `git-flow`-CLI (AVH) gleichwertig: `git flow init -d`, dann
 - Brechende Änderungen: `feat!:` bzw. Footer `BREAKING CHANGE: …`.
 - Ein Commit = eine logische Änderung. Typecheck und Tests sollen nach jedem Commit grün sein.
 
+### Autor und Commit-Footer (verbindlich, auch für KI-Agenten)
+
+- Autor **und** Committer jedes Commits: **`Jan <log@janwalenda.de>`** – keine andere Identität,
+  auch nicht die des Agenten. Vor dem ersten Commit einer Sitzung prüfen bzw. setzen:
+  `git config user.name "Jan" && git config user.email "log@janwalenda.de"`.
+- **Keine** `Co-Authored-By:`-Zeilen in Commit-Nachrichten (auch nicht für Claude/Cursor).
+- Gilt ebenso für Merge-Commits und Tags (Tagger = Jan).
+
 ## Regeln für KI-Agenten (Claude Code, Cursor)
 
 - Vor jeder Änderung prüfen, auf welchem Branch du bist. Für neue Arbeit **immer**
   einen passenden `feature/`- oder `bugfix/`-Branch von `develop` anlegen.
   Zusammenhängender Code gehört in **einen** Branch; Unzusammenhängendes in getrennte.
+- **Kein Feature und kein Fix ohne Tests** – siehe `testing.mdc`. Ein `feature/`- oder `bugfix/`-Branch,
+  der Code ändert, wird ohne passende neue/angepasste Tests nicht nach `develop` gemergt.
 - Vor dem Merge nach `develop`: `npm run typecheck && npm test && npm run build` müssen grün sein.
 - **Nie** auf `main` pushen, Releases abschließen, Tags pushen oder `npm publish`
   ausführen ohne ausdrückliche Freigabe des Nutzers.
