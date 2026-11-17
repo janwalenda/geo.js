@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { expectVec } from '../../test/helpers';
-import { Mat4, Quat, Vec3, approxEqual, clamp, degToRad, lerp, radToDeg } from './index';
+import { expectVec } from '../helpers';
+import { Mat4, Quat, Vec3, approxEqual, clamp, degToRad, lerp, radToDeg } from '../../src/math/index';
 
 describe('Quat', () => {
     it('axis-angle rotates counter-clockwise', () => {

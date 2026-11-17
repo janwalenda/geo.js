@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { DisplayList } from '../render';
-import { CanvasRenderer } from './CanvasRenderer';
+import type { DisplayList } from '../../src/render';
+import { CanvasRenderer } from '../../src/renderers/CanvasRenderer';
 
 /** Minimal stand-in for CanvasRenderingContext2D that records what is drawn. */
 function fakeCanvas() {

@@ -44,6 +44,20 @@ Auf `main` und `develop` wird **nie direkt committet** – nur gemergt.
 - `<kurzname>` in kebab-case, englisch, knapp: `feature/GEO-12-math-core`.
 - Versionen folgen **SemVer**. Vor 1.0.0 dürfen Minor-Versionen brechende Änderungen enthalten.
 
+## Legacy-Branches
+
+Eingefrorene Branches aus der Zeit vor v0.1.0. Sie bleiben zu Archivzwecken bestehen,
+enthalten eine `LEGACY.md` und werden **nie** gemergt, rebased oder weiterentwickelt –
+sie bauen auf der alten API auf, die mit v0.1.0 ersetzt wurde.
+
+| Branch                             | Stand      | Inhalt                                        |
+|------------------------------------|------------|-----------------------------------------------|
+| `feature/GEO-08_Fixing_TS_Stuff`   | 2023-01-14 | TS-Fixes/Refactoring der alten API            |
+| `feature/subdivide`                | 2023-05-31 | Unterteilung für `Geo3D` (alte API)           |
+
+Ideen daraus werden – falls gewünscht – in einem neuen `feature/GEO-<nr>-…` von `develop`
+neu umgesetzt. Neue Legacy-Branches: `LEGACY.md` committen und hier eintragen.
+
 ## Ablauf
 
 ```bash
@@ -53,11 +67,15 @@ git checkout -b feature/GEO-12-math-core
 
 # … committen …
 
-# Feature abschließen (immer --no-ff, damit der Branch in der Historie sichtbar bleibt)
+# Feature abschließen
 npm run typecheck && npm test && npm run build
-git checkout develop
+git push -u origin feature/GEO-12-math-core      # IMMER vor dem Merge pushen → CI läuft auf dem Branch
+# … CI-Lauf des Branches abwarten; bei Rot fixen und erneut pushen, nicht mergen …
+git checkout develop && git pull
 git merge --no-ff feature/GEO-12-math-core -m "Merge branch 'feature/GEO-12-math-core' into develop"
+git push origin develop
 git branch -d feature/GEO-12-math-core
+git push origin --delete feature/GEO-12-math-core   # Remote-Branch nach dem Merge aufräumen
 
 # Release
 git checkout -b release/0.2.0 develop
@@ -87,12 +105,27 @@ Mit installiertem `git-flow`-CLI (AVH) gleichwertig: `git flow init -d`, dann
 - Brechende Änderungen: `feat!:` bzw. Footer `BREAKING CHANGE: …`.
 - Ein Commit = eine logische Änderung. Typecheck und Tests sollen nach jedem Commit grün sein.
 
+### Autor und Commit-Footer (verbindlich, auch für KI-Agenten)
+
+- Autor **und** Committer jedes Commits: **`Jan <log@janwalenda.de>`** – keine andere Identität,
+  auch nicht die des Agenten. Vor dem ersten Commit einer Sitzung prüfen bzw. setzen:
+  `git config user.name "Jan" && git config user.email "log@janwalenda.de"`.
+- **Keine** `Co-Authored-By:`-Zeilen in Commit-Nachrichten (auch nicht für Claude/Cursor).
+- Gilt ebenso für Merge-Commits und Tags (Tagger = Jan).
+
 ## Regeln für KI-Agenten (Claude Code, Cursor)
 
 - Vor jeder Änderung prüfen, auf welchem Branch du bist. Für neue Arbeit **immer**
   einen passenden `feature/`- oder `bugfix/`-Branch von `develop` anlegen.
   Zusammenhängender Code gehört in **einen** Branch; Unzusammenhängendes in getrennte.
+- **Kein Feature und kein Fix ohne Tests** – siehe `testing.mdc`. Ein `feature/`- oder `bugfix/`-Branch,
+  der Code ändert, wird ohne passende neue/angepasste Tests nicht nach `develop` gemergt.
 - Vor dem Merge nach `develop`: `npm run typecheck && npm test && npm run build` müssen grün sein.
+- **Jeder `feature/`-, `bugfix/`- und `hotfix/`-Branch wird vor dem Merge gepusht**
+  (`git push -u origin <branch>`), damit er auf GitHub sichtbar ist und die CI darauf läuft.
+  Erst mergen, wenn der CI-Lauf des Branches grün ist. Gilt auch für reine Doku-/Regel-Branches.
+- Nach dem Merge den Branch lokal **und** remote löschen. Lässt die Umgebung das Löschen des
+  Remote-Branches nicht zu, den Nutzer darauf hinweisen statt es zu umgehen.
 - **Nie** auf `main` pushen, Releases abschließen, Tags pushen oder `npm publish`
   ausführen ohne ausdrückliche Freigabe des Nutzers.
 - **Nie** `develop` oder `main` force-pushen oder deren Historie umschreiben.

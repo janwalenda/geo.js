@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { BoxGeometry, Geometry, PlaneGeometry } from '../geometry';
-import { Vec3 } from '../math';
+import { BoxGeometry, Geometry, PlaneGeometry } from '../../src/geometry';
+import { Vec3 } from '../../src/math';
 import {
     AmbientLight, type Camera, DirectionalLight, Material, Mesh, OrthographicCamera, PerspectiveCamera, Points, Polyline, Scene,
-} from '../scene';
-import { compile, projectPoint } from './compile';
-import type { PolygonPrimitive } from './DisplayList';
+} from '../../src/scene';
+import { compile, projectPoint } from '../../src/render/compile';
+import type { PolygonPrimitive } from '../../src/render/DisplayList';
 
 const W = 200;
 const H = 100;

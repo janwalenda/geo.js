@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { expectVec } from '../../test/helpers';
+import { expectVec } from '../helpers';
 import {
     Circle, Ellipse, FunctionGraph, Line, ParametricCurve, Polygon, Polyline2D, Rect, RegularPolygon, SineWave,
-} from './index';
+} from '../../src/shapes/index';
 
 describe('2D shapes', () => {
     it('Rect is centered on its position and transformed T · R · S', () => {

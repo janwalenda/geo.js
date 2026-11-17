@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { BoxGeometry } from '../geometry';
-import { Vec3 } from '../math';
-import type { DisplayList } from '../render';
-import { Material, Mesh, PerspectiveCamera, Scene } from '../scene';
-import { SVGRenderer } from './SVGRenderer';
-import { toSVGString } from './svgMarkup';
+import { BoxGeometry } from '../../src/geometry';
+import { Vec3 } from '../../src/math';
+import type { DisplayList } from '../../src/render';
+import { Material, Mesh, PerspectiveCamera, Scene } from '../../src/scene';
+import { SVGRenderer } from '../../src/renderers/SVGRenderer';
+import { toSVGString } from '../../src/renderers/svgMarkup';
 
 const list: DisplayList = {
     width: 100,
