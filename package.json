@@ -1,6 +1,6 @@
 {
   "name": "@janwalenda/geo",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "A math-based 2D/3D engine that renders to Canvas and SVG.",
   "keywords": [
     "3d",
@@ -49,6 +49,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "sideEffects": false,

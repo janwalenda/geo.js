@@ -17,12 +17,15 @@ src/math/       Vec2, Vec3, Vec4, Mat3, Mat4, Quat, utils     – rein, kein DOM
 src/scene/      Object3D, Scene, Mesh, Polyline, Points,        – rein, kein DOM
                 Camera (Perspective/Orthographic), Lights, Material, Color
 src/geometry/   Geometry + Generatoren (Box, Plane, UVSphere,   – rein, kein DOM
-                IcoSphere, Torus, Parametric)
-src/shapes/     2D-Formen (Circle, Rect, Line, Polygon, …)      – rein, kein DOM
+                Tetra/Octa/Icosahedron, Torus, Cylinder, Cone,
+                Parametric)
+src/shapes/     2D-Formen (Shape2D: Circle, Rect, Ellipse,      – rein, kein DOM
+                Polygon, Line, FunctionGraph, ParametricCurve, …)
 src/render/     compile(): Szene + Kamera → DisplayList          – rein, kein DOM
                 (Transform → Near-Clipping → Projektion → Culling
                  → Flat-Shading → Tiefensortierung)
-src/renderers/  CanvasRenderer, SVGRenderer, toSVGString         – einzige Stelle mit DOM
+src/renderers/  CanvasRenderer, SVGRenderer, toSVGString,        – einzige Stelle mit DOM
+                animate()
 src/index.ts    öffentliche API (alles, was exportiert wird, ist API)
 ```
 
@@ -41,10 +44,16 @@ Ein neuer Renderer braucht deshalb nur `draw(list)`.
 | `npm run build`     | Rollup: `dist/geo.js` (ESM), `geo.cjs`, `geo.min.js`, `geo.umd.min.js`, `geo.d.ts` |
 | `npm run test:dist` | Smoke-Test aller gebauten Einstiegspunkte (nach `build`) |
 
+Weitere Orte: `demo/` (Vite-Demo, Canvas und SVG nebeneinander, `?static` friert ein),
+`test/` (Test-Helfer, README-Beispiele), `scripts/verify-dist.mjs` (Bundle-Smoke-Test),
+`rollup.config.mjs` (Library-Build), `CHANGELOG.md` (Keep a Changelog).
+
 ## Leitplanken
 
 - Schichten unterhalb von `src/renderers/` dürfen **kein** `document`, `window`,
   Canvas- oder SVG-API verwenden – sie müssen in Node testbar sein.
 - Canvas und SVG müssen für dieselbe DisplayList **dasselbe Bild** liefern
   (gleiche Füllung, Kontur, Linienbreite, Deckkraft, Reihenfolge).
-- Öffentliche API nur über `src/index.ts` exportieren; Änderungen daran im CHANGELOG vermerken.
+- Öffentliche API nur über `src/index.ts` exportieren; jede sichtbare Änderung im
+  Abschnitt `[Unreleased]` von `CHANGELOG.md` vermerken (im selben Feature-Branch).
+- Beispiele in `README.md` werden von `test/readme.test.ts` ausgeführt – bei API-Änderungen beide anpassen.
