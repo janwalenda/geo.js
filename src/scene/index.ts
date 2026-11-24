@@ -1,13 +1,23 @@
+export { AmbientLight } from './AmbientLight';
+export { Camera } from './Camera';
 export { Color } from './Color';
-export type { ColorLike } from './Color';
+export { DirectionalLight } from './DirectionalLight';
+export { Light } from './Light';
 export { Material } from './Material';
-export type { MaterialOptions, Side } from './Material';
-export { Texture } from './Texture';
-export { Object3D } from './Object3D';
-export { Scene } from './Scene';
 export { Mesh } from './Mesh';
-export { Polyline } from './Polyline';
+export { Object3D } from './Object3D';
+export { OrthographicCamera } from './OrthographicCamera';
+export { PerspectiveCamera } from './PerspectiveCamera';
+export { PointLight } from './PointLight';
 export { Points } from './Points';
-export { Camera, OrthographicCamera, PerspectiveCamera } from './Camera';
-export type { OrthographicCameraOptions, PerspectiveCameraOptions } from './Camera';
-export { AmbientLight, DirectionalLight, Light, PointLight } from './Light';
+export { Polyline } from './Polyline';
+export { Scene } from './Scene';
+export { Texture } from './Texture';
+export type {
+  ColorLike,
+  MaterialOptions,
+  OrthographicCameraOptions,
+  PerspectiveCameraOptions,
+  SceneOptions,
+  Side,
+} from './types';

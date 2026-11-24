@@ -9,8 +9,8 @@
 export * from './math';
 
 // Scene graph
-export * from './scene';
 export * from './geometry';
+export * from './scene';
 
 // 2D shapes
 export * from './shapes';

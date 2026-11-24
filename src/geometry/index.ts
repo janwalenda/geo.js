@@ -1,11 +1,13 @@
-export { Geometry } from './Geometry';
 export { BoxGeometry } from './BoxGeometry';
-export { PlaneGeometry } from './PlaneGeometry';
-export { UVSphereGeometry } from './UVSphereGeometry';
-export {
-    IcosahedronGeometry, OctahedronGeometry, PolyhedronGeometry, TetrahedronGeometry,
-} from './PolyhedronGeometry';
+export { ConeGeometry } from './ConeGeometry';
+export { CylinderGeometry } from './CylinderGeometry';
+export { Geometry } from './Geometry';
+export { IcosahedronGeometry } from './IcosahedronGeometry';
+export { OctahedronGeometry } from './OctahedronGeometry';
 export { ParametricGeometry } from './ParametricGeometry';
-export type { ParametricFunction, ParametricOptions } from './ParametricGeometry';
+export { PlaneGeometry } from './PlaneGeometry';
+export { PolyhedronGeometry } from './PolyhedronGeometry';
+export { TetrahedronGeometry } from './TetrahedronGeometry';
 export { TorusGeometry } from './TorusGeometry';
-export { ConeGeometry, CylinderGeometry } from './CylinderGeometry';
+export type { ParametricFunction, ParametricOptions } from './types';
+export { UVSphereGeometry } from './UVSphereGeometry';

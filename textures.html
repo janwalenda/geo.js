@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,37 +6,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>geo.js textures</title>
     <style>
-      :root { color-scheme: light dark; --bg: #f4f5f7; --panel: #ffffff; --text: #1d2330; --muted: #677086; --line: #dde1e8; }
-      @media (prefers-color-scheme: dark) {
-        :root { --bg: #14171d; --panel: #1c2028; --text: #e6e9ef; --muted: #8b93a7; --line: #2c323d; }
+      :root {
+        color-scheme: light dark;
+        --bg: #f4f5f7;
+        --panel: #ffffff;
+        --text: #1d2330;
+        --muted: #677086;
+        --line: #dde1e8;
       }
-      * { box-sizing: border-box; }
-      body { margin: 0; font: 14px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--text); }
-      main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
-      h1 { font-size: 22px; margin: 0 0 4px; }
-      h2 { font-size: 16px; margin: 28px 0 4px; }
-      p { margin: 0 0 16px; color: var(--muted); }
-      .views { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
-      figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-      figcaption { display: flex; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
-      figcaption span { color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; }
-      .surface { display: block; width: 100%; aspect-ratio: 4 / 3; }
-      .surface > * { display: block; }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14171d;
+          --panel: #1c2028;
+          --text: #e6e9ef;
+          --muted: #8b93a7;
+          --line: #2c323d;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 28px 0 4px;
+      }
+      p {
+        margin: 0 0 16px;
+        color: var(--muted);
+      }
+      .views {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+      figure {
+        margin: 0;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      figcaption {
+        display: flex;
+        gap: 8px;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      figcaption span {
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+        margin-left: auto;
+      }
+      .surface {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+      }
+      .surface > * {
+        display: block;
+      }
     </style>
   </head>
   <body>
     <main>
       <h1>Texture mapping (prototype)</h1>
-      <p>Images on faces via per-triangle affine maps – the same display list drawn by Canvas 2D and SVG.</p>
+      <p>
+        Images on faces via per-triangle affine maps – the same display list
+        drawn by Canvas 2D and SVG.
+      </p>
       <div class="views">
-        <figure id="scene-canvas"><figcaption>Canvas 2D <span></span></figcaption><div class="surface"></div></figure>
-        <figure id="scene-svg"><figcaption>SVG <span></span></figcaption><div class="surface"></div></figure>
+        <figure id="scene-canvas">
+          <figcaption>Canvas 2D <span></span></figcaption>
+          <div class="surface"></div>
+        </figure>
+        <figure id="scene-svg">
+          <figcaption>SVG <span></span></figcaption>
+          <div class="surface"></div>
+        </figure>
       </div>
       <h2>Perspective distortion</h2>
-      <p>One quad, no subdivision (purely affine) vs. <code>textureDetail: 'auto'</code>.</p>
+      <p>
+        One quad, no subdivision (purely affine) vs.
+        <code>textureDetail: 'auto'</code>.
+      </p>
       <div class="views">
-        <figure id="affine"><figcaption>textureDetail: 1 <span></span></figcaption><div class="surface"></div></figure>
-        <figure id="auto"><figcaption>textureDetail: 'auto' <span></span></figcaption><div class="surface"></div></figure>
+        <figure id="affine">
+          <figcaption>textureDetail: 1 <span></span></figcaption>
+          <div class="surface"></div>
+        </figure>
+        <figure id="auto">
+          <figcaption>textureDetail: 'auto' <span></span></figcaption>
+          <div class="surface"></div>
+        </figure>
       </div>
     </main>
     <script type="module" src="/demo/textures.ts"></script>

@@ -4,10 +4,10 @@
 
 geo.js is before 1.0. Security fixes are made for the latest released version only.
 
-| Version | Supported |
-|---------|-----------|
-| latest `0.x` release | yes |
-| older releases | no |
+| Version              | Supported |
+| -------------------- | --------- |
+| latest `0.x` release | yes       |
+| older releases       | no        |
 
 ## Reporting a vulnerability
 
@@ -15,7 +15,7 @@ geo.js is before 1.0. Security fixes are made for the latest released version on
 
 Report it privately through GitHub instead:
 [Report a vulnerability](https://github.com/janwalenda/geo.js/security/advisories/new)
-(repository tab *Security* → *Report a vulnerability*).
+(repository tab _Security_ → _Report a vulnerability_).
 
 Please include:
 

@@ -1,6 +1,23 @@
-export { Shape2D, toVec2 } from './Shape2D';
-export type { PointLike, ShapeOptions } from './Shape2D';
-export { Circle, Ellipse, Line, Polygon, Polyline2D, Rect, RegularPolygon } from './basic';
-export type { CircleOptions, EllipseOptions, RectOptions, RegularPolygonOptions } from './basic';
-export { FunctionGraph, ParametricCurve, SineWave } from './curves';
-export type { FunctionGraphOptions, ParametricCurveOptions, SineWaveOptions } from './curves';
+export { Circle } from './Circle';
+export { Ellipse } from './Ellipse';
+export { FunctionGraph } from './FunctionGraph';
+export { toVec2 } from './helpers';
+export { Line } from './Line';
+export { ParametricCurve } from './ParametricCurve';
+export { Polygon } from './Polygon';
+export { Polyline2D } from './Polyline2D';
+export { Rect } from './Rect';
+export { RegularPolygon } from './RegularPolygon';
+export { Shape2D } from './Shape2D';
+export { SineWave } from './SineWave';
+export type {
+  CircleOptions,
+  EllipseOptions,
+  FunctionGraphOptions,
+  ParametricCurveOptions,
+  PointLike,
+  RectOptions,
+  RegularPolygonOptions,
+  ShapeOptions,
+  SineWaveOptions,
+} from './types';

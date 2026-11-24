@@ -1,52 +1,30 @@
-import { Vec2 } from '../math/Vec2';
 import type { Vec3 } from '../math/Vec3';
 import { Geometry } from './Geometry';
-
-/** Surface point for parameters `u, v ∈ [0, 1]`. */
-export type ParametricFunction = (u: number, v: number) => Vec3;
-
-export interface ParametricOptions {
-    /** Number of quads along u. Default `16`. */
-    slicesU?: number;
-    /** Number of quads along v. Default `16`. */
-    slicesV?: number;
-    /** f(1, v) = f(0, v): reuse the first column instead of duplicating it. Default `false`. */
-    closedU?: boolean;
-    /** f(u, 1) = f(u, 0): reuse the first row instead of duplicating it. Default `false`. */
-    closedV?: boolean;
-}
+import { quadGrid } from './helpers';
+import type { ParametricFunction, ParametricOptions } from './types';
 
 /**
- * Surface of a function `f(u, v)` sampled on a grid of quads – the general tool for
- * plotting mathematical surfaces. The front side is where `∂f/∂u × ∂f/∂v` points.
- * UVs: texture point `(u, 1 − v)` ↦ `f(u, v)`, so the image reads unmirrored from the
- * front side (image right = ∂f/∂u, image up = ∂f/∂v).
+ * Surface of a function `f(u, v)` sampled on a grid of quads – the general tool
+ * for plotting mathematical surfaces. The front side is where `∂f/∂u × ∂f/∂v`
+ * points. UVs: texture point `(u, 1 − v)` ↦ `f(u, v)`, so the image reads
+ * unmirrored from the front side (image right = ∂f/∂u, image up = ∂f/∂v).
  */
 export class ParametricGeometry extends Geometry {
-    constructor(fn: ParametricFunction, options: ParametricOptions = {}) {
-        const nu = Math.max(1, Math.floor(options.slicesU ?? 16));
-        const nv = Math.max(1, Math.floor(options.slicesV ?? 16));
-        const closedU = options.closedU ?? false;
-        const closedV = options.closedV ?? false;
-        const columns = closedU ? nu : nu + 1;
-        const rows = closedV ? nv : nv + 1;
+  constructor(fn: ParametricFunction, options: ParametricOptions = {}) {
+    const nu = Math.max(1, Math.floor(options.slicesU ?? 16));
+    const nv = Math.max(1, Math.floor(options.slicesV ?? 16));
+    const closedU = options.closedU ?? false;
+    const closedV = options.closedV ?? false;
+    const columns = closedU ? nu : nu + 1;
+    const rows = closedV ? nv : nv + 1;
 
-        const vertices: Vec3[] = [];
-        for (let j = 0; j < rows; j++) {
-            for (let i = 0; i < columns; i++) vertices.push(fn(i / nu, j / nv));
-        }
-        const index = (i: number, j: number) => (j % rows) * columns + (i % columns);
-        const faces: number[][] = [];
-        const uvs: Vec2[][] = [];
-        for (let j = 0; j < nv; j++) {
-            for (let i = 0; i < nu; i++) {
-                faces.push([index(i, j), index(i + 1, j), index(i + 1, j + 1), index(i, j + 1)]);
-                uvs.push([
-                    new Vec2(i / nu, 1 - j / nv), new Vec2((i + 1) / nu, 1 - j / nv),
-                    new Vec2((i + 1) / nu, 1 - (j + 1) / nv), new Vec2(i / nu, 1 - (j + 1) / nv),
-                ]);
-            }
-        }
-        super(vertices, faces, uvs);
+    const vertices: Vec3[] = [];
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < columns; i++) {
+        vertices.push(fn(i / nu, j / nv));
+      }
     }
+    const { faces, uvs } = quadGrid({ cellsU: nu, cellsV: nv, columns, rows });
+    super(vertices, faces, uvs);
+  }
 }

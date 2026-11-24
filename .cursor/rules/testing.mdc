@@ -20,7 +20,7 @@ tests in the **same branch**. No tests, no merge.
 | Public API / README             | update `test/readme.test.ts` or `test/dist/verify-dist.mjs` |
 | Refactoring without behaviour change | existing tests stay green unchanged; add missing coverage first |
 
-Exception: docs/rules/CI-only changes without code – there, only keep `npm test` green.
+Exception: docs/rules/CI-only changes without code – there, only keep `npm run check` green.
 
 Fixing bugs: write the failing test first and see it red, then fix.
 Name the added tests in the merge/commit text and in the answer to the user.
@@ -40,4 +40,5 @@ Name the added tests in the merge/commit text and in the answer to the user.
   (e.g. `M · M⁻¹ = I`, rotation preserves length, normals point outwards).
 - Compare floats with `toBeCloseTo` or the `expectVec` helper, never with `toBe`.
 - Every bug fix gets a test that fails without the fix.
-- `npm test` must be green before every merge into `develop`.
+- `npm run check` (which includes `npm test`) must be green before every merge
+  into `develop`.

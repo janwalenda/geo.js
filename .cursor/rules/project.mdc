@@ -39,7 +39,10 @@ A new renderer therefore only needs `draw(list)`.
 | Command             | Purpose |
 |---------------------|---------|
 | `npm run dev`       | Demo (`index.html`, `demo/`) with the Vite dev server |
+| `npm run check`     | **Everything CI runs:** typecheck, lint, format check, tests, build, dist smoke test |
 | `npm run typecheck` | `tsc --noEmit` (strict) |
+| `npm run lint`      | ESLint (`lint:fix` applies safe fixes) |
+| `npm run format`    | Prettier (`format:check` only checks) |
 | `npm test`          | Vitest once; `npm run test:watch` in watch mode |
 | `npm run build`     | Rollup: `dist/geo.js` (ESM), `geo.cjs`, `geo.min.js`, `geo.umd.min.js`, `geo.d.ts` |
 | `npm run test:dist` | Smoke test of all built entry points (after `build`) |
@@ -47,7 +50,9 @@ A new renderer therefore only needs `draw(list)`.
 Other places: `demo/` (Vite demo, Canvas and SVG side by side, `?static` freezes it),
 `test/` (**all** tests, structure mirrors `src/`, plus helpers, README examples and the
 bundle smoke test `test/dist/verify-dist.mjs`),
-`rollup.config.mjs` (library build), `CHANGELOG.md` (Keep a Changelog).
+`rollup.config.mjs` (library build), `eslint.config.mjs` + `tools/eslint/`
+(lint rules, incl. project-specific ones), `.prettierrc.json` (formatting),
+`CHANGELOG.md` (Keep a Changelog).
 
 ## Guard rails
 

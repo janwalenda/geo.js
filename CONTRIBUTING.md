@@ -28,7 +28,7 @@ Only the maintainer can push to this repository. Everyone else contributes throu
 4. Run the full check locally:
    ```bash
    npm ci
-   npm run typecheck && npm test && npm run build && npm run test:dist
+   npm run check   # typecheck, lint, format check, tests, build
    ```
 5. Push to your fork and open a pull request **against `develop`**.
 
@@ -56,7 +56,12 @@ What happens next:
   a regression test that fails without the fix. All tests live in `test/`, mirroring `src/`.
 - **Canvas and SVG must produce the same image** for the same scene.
 - Layers below `src/renderers/` must not use the DOM (they are tested in Node).
-- TypeScript `strict`, no `any`, named exports only, 4 spaces, single quotes, semicolons.
+- Code style is enforced by ESLint and Prettier: run `npm run format` and
+  `npm run lint:fix`, then fix what remains by hand. Lines are at most 80
+  characters; one class per file; exported types live in the folder's
+  `types.ts`; every public method has JSDoc. Details in
+  [`.cursor/rules/typescript.mdc`](.cursor/rules/typescript.mdc).
+- TypeScript `strict`, no `any`, named exports only.
 - Public API is exported only through `src/index.ts`; update `README.md` examples
   (they are executed by `test/readme.test.ts`) when the API changes.
 - Note user-visible changes in the `[Unreleased]` section of [CHANGELOG.md](CHANGELOG.md).

@@ -21,12 +21,24 @@ npm install @janwalenda/geo
 
 ```ts
 import {
-    AmbientLight, CanvasRenderer, DirectionalLight, IcosahedronGeometry, Material,
-    Mesh, PerspectiveCamera, SVGRenderer, Scene, Vec3, animate,
+  AmbientLight,
+  CanvasRenderer,
+  DirectionalLight,
+  IcosahedronGeometry,
+  Material,
+  Mesh,
+  PerspectiveCamera,
+  SVGRenderer,
+  Scene,
+  Vec3,
+  animate,
 } from '@janwalenda/geo';
 
 const scene = new Scene({ background: '#ffffff' });
-const ball = new Mesh(new IcosahedronGeometry(1, 2), new Material({ fill: '#4f7cff' }));
+const ball = new Mesh(
+  new IcosahedronGeometry(1, 2),
+  new Material({ fill: '#4f7cff' }),
+);
 const sun = new DirectionalLight('#ffffff', 0.9);
 sun.position.set(3, 5, 4);
 scene.add(ball, new AmbientLight('#ffffff', 0.3), sun);
@@ -40,8 +52,8 @@ const renderer = new CanvasRenderer({ width: 640, height: 480 }); // or new SVGR
 document.body.appendChild(renderer.domElement);
 
 animate((time) => {
-    ball.rotation.setFromEuler(0, time, 0);
-    renderer.render(scene, camera);
+  ball.rotation.setFromEuler(0, time, 0);
+  renderer.render(scene, camera);
 });
 ```
 
@@ -51,10 +63,25 @@ animate((time) => {
 import { Circle, FunctionGraph, SVGRenderer } from '@janwalenda/geo';
 
 const renderer = new SVGRenderer({ width: 300, height: 200 });
-renderer.render2D([
-    new FunctionGraph({ fn: Math.sin, xMin: -Math.PI, xMax: Math.PI, unit: 40, position: [150, 100], stroke: 'red' }),
-    new Circle({ position: [150, 100], radius: 4, fill: 'black', stroke: null }),
-], '#ffffff');
+renderer.render2D(
+  [
+    new FunctionGraph({
+      fn: Math.sin,
+      xMin: -Math.PI,
+      xMax: Math.PI,
+      unit: 40,
+      position: [150, 100],
+      stroke: 'red',
+    }),
+    new Circle({
+      position: [150, 100],
+      radius: 4,
+      fill: 'black',
+      stroke: null,
+    }),
+  ],
+  '#ffffff',
+);
 
 // 2D shapes can also be drawn on top of a 3D scene:
 // renderer.render(scene, camera, [new Circle({ ... })]);
@@ -70,19 +97,28 @@ at full high-DPI resolution.
 import { CanvasRenderer, Circle, SVGRenderer } from '@janwalenda/geo';
 
 const svg = new SVGRenderer({ width: 300, height: 200 });
-svg.render2D([new Circle({ position: [150, 100], radius: 40, fill: '#4f7cff' })], '#ffffff');
+svg.render2D(
+  [new Circle({ position: [150, 100], radius: 40, fill: '#4f7cff' })],
+  '#ffffff',
+);
 
 // A ready-made <a download> link with a snapshot of the current frame
-document.body.appendChild(svg.createDownloadLink({ filename: 'circle.svg', text: 'Save SVG' }));
+document.body.appendChild(
+  svg.createDownloadLink({ filename: 'circle.svg', text: 'Save SVG' }),
+);
 
 // Or trigger the download directly, e.g. from a button
 button.addEventListener('click', () => svg.download('circle.svg'));
 
-const canvas = new CanvasRenderer({ width: 300, height: 200, imageType: 'image/png' });
-await canvas.download('scene.png');      // → scene.png
-const blob = await canvas.toBlob();      // e.g. for upload
-const url = canvas.toDataURL();          // data:image/png;base64,…
-const markup = svg.toSVGString();        // '<svg xmlns=…>…</svg>'
+const canvas = new CanvasRenderer({
+  width: 300,
+  height: 200,
+  imageType: 'image/png',
+});
+await canvas.download('scene.png'); // → scene.png
+const blob = await canvas.toBlob(); // e.g. for upload
+const url = canvas.toDataURL(); // data:image/png;base64,…
+const markup = svg.toSVGString(); // '<svg xmlns=…>…</svg>'
 ```
 
 `createDownloadLink()` uses a `data:` URL, so the link needs no cleanup and keeps
@@ -93,7 +129,15 @@ which also works for very large canvases. JPEG has no transparency – give the 
 ### Server-side rendering / export (no DOM)
 
 ```ts
-import { BoxGeometry, Mesh, PerspectiveCamera, Scene, Vec3, compile, toSVGString } from '@janwalenda/geo';
+import {
+  BoxGeometry,
+  Mesh,
+  PerspectiveCamera,
+  Scene,
+  Vec3,
+  compile,
+  toSVGString,
+} from '@janwalenda/geo';
 
 const scene = new Scene().add(new Mesh(new BoxGeometry()));
 const camera = new PerspectiveCamera();
@@ -111,11 +155,15 @@ import { Material, Mesh, ParametricGeometry, Vec3 } from '@janwalenda/geo';
 
 // z = sin(x) · cos(y) over [-3, 3]²; the front side is where ∂f/∂u × ∂f/∂v points
 const surface = new Mesh(
-    new ParametricGeometry((u, v) => {
-        const x = (u - 0.5) * 6, y = (v - 0.5) * 6;
-        return new Vec3(x, y, Math.sin(x) * Math.cos(y));
-    }, { slicesU: 32, slicesV: 32 }),
-    new Material({ fill: '#c9cfdb', side: 'double' }),
+  new ParametricGeometry(
+    (u, v) => {
+      const x = (u - 0.5) * 6,
+        y = (v - 0.5) * 6;
+      return new Vec3(x, y, Math.sin(x) * Math.cos(y));
+    },
+    { slicesU: 32, slicesV: 32 },
+  ),
+  new Material({ fill: '#c9cfdb', side: 'double' }),
 );
 ```
 
@@ -138,13 +186,13 @@ Front faces are counter-clockwise. Angles are in radians, except
 
 ## Bundles
 
-| File                   | Format             | Use                                                     |
-|------------------------|--------------------|---------------------------------------------------------|
-| `dist/geo.js`          | ESM, readable      | Bundlers (`import … from '@janwalenda/geo'`)            |
-| `dist/geo.cjs`         | CommonJS, readable | Node (`require('@janwalenda/geo')`)                     |
-| `dist/geo.min.js`      | ESM, minified      | Browser `<script type="module">`, `@janwalenda/geo/min` |
-| `dist/geo.umd.min.js`  | UMD, minified      | Browser `<script>`, CDN, global `Geo`                   |
-| `dist/geo.d.ts`        | TypeScript types   | Bundled declarations (`geo.d.cts` for `require`)        |
+| File                  | Format             | Use                                                     |
+| --------------------- | ------------------ | ------------------------------------------------------- |
+| `dist/geo.js`         | ESM, readable      | Bundlers (`import … from '@janwalenda/geo'`)            |
+| `dist/geo.cjs`        | CommonJS, readable | Node (`require('@janwalenda/geo')`)                     |
+| `dist/geo.min.js`     | ESM, minified      | Browser `<script type="module">`, `@janwalenda/geo/min` |
+| `dist/geo.umd.min.js` | UMD, minified      | Browser `<script>`, CDN, global `Geo`                   |
+| `dist/geo.d.ts`       | TypeScript types   | Bundled declarations (`geo.d.cts` for `require`)        |
 
 ```html
 <script src="https://unpkg.com/@janwalenda/geo/dist/geo.umd.min.js"></script>

@@ -1,19 +1,72 @@
 ---
 description: TypeScript and code conventions for the geo.js source code
-globs: src/**/*.ts, demo/**/*.ts
+globs: src/**/*.ts, demo/**/*.ts, test/**/*.ts, tools/**/*.mjs
 alwaysApply: false
 ---
 
 # TypeScript conventions
 
-- `strict` is on; no `any` (use `unknown` + a type guard instead). No `!` non-null assertion
-  when the case can be checked properly.
-- ES modules, named exports, **no** default exports. One class per file,
-  file name = class name (`Mat4.ts`). Every folder has an `index.ts`.
-- Code, identifiers, comments and JSDoc in **English**. JSDoc on every public class/method,
-  incl. the unit (radians, pixels) and whether the object is mutated.
-- Options objects instead of long parameter lists; options have sensible defaults
-  (`interface FooOptions` + `Partial`/defaults in the constructor).
+Most of these rules are enforced by **ESLint** (`eslint.config.mjs`, strict
+type-checked typescript-eslint presets plus project rules in `tools/eslint/`)
+and **Prettier** (`.prettierrc.json`). `npm run check` must be green; never
+disable a rule to get there – fix the code. The rare justified exception uses
+`// eslint-disable-next-line <rule> -- <reason>` (e.g. `Mat4.set` with its 16
+elements).
+
+## Formatting (Prettier)
+
+- **At most 80 characters per line** – code, comments and JSDoc (long string
+  literals such as test titles are the only exception).
+- 2 spaces, single quotes, semicolons, trailing commas, LF line endings.
+- Run `npm run format` (or format on save); never hand-format against Prettier.
+
+## Structure
+
+- **One class per file**, file name = class name (`Mat4.ts`). A file with a
+  class contains **only that class** (plus unexported constants); helper
+  functions live in their own module (`helpers.ts`, `mat4Helpers.ts`,
+  `clipping.ts`, …).
+- **Types are separated from code:** every exported `interface` / `type`
+  lives in the `types.ts` of its folder, and `types.ts` contains no runtime
+  code. Types used by a single file may stay there, unexported.
+- Type-only imports and exports use `import type` / `export type`.
+- Every folder has an `index.ts` (barrel) that exports the public API of the
+  folder. ES modules, named exports, **no** default exports.
+- Imports and exports are sorted (`simple-import-sort`).
+
+## Code blocks and control flow
+
+- **Always braces** for `if`/`else`/`for`/`while`, also for one-liners
+  (`curly: all`).
+- `===` only; no nested ternaries; no `else` after `return`.
+- Small units: complexity ≤ 12, nesting depth ≤ 3, ≤ 50 lines and ≤ 25
+  statements per function, ≤ 4 parameters (use an options object), ≤ 300
+  lines per file. Split instead of growing.
+- No parameter reassignment, no implicit coercion (`+x`, `!!x`), no
+  `console` in library code.
+
+## Types
+
+- `strict`, `noImplicitOverride`, `noImplicitReturns`,
+  `noFallthroughCasesInSwitch` are on.
+- No `any` (use `unknown` + a type guard). No `!` non-null assertion outside
+  tests – check the case properly.
+- Explicit return types on functions; `override` on members that implement or
+  override a base class member; `readonly` where a member is never
+  reassigned.
+- Options objects instead of long parameter lists; options have sensible
+  defaults (`interface FooOptions` in `types.ts` + defaults in the
+  constructor).
+
+## Documentation
+
+- Code, identifiers, comments and JSDoc in **English**.
+- JSDoc on every class, function, interface, type alias and **public
+  method** (members marked `override` inherit their base class docs). State
+  units (radians, pixels) and whether the object is mutated.
+- Comments explain *why*; the code says *what*.
+
+## Other
+
 - No side effects on import (the package is `sideEffects: false`).
-- No `console.log` in library code.
-- Formatting: 4 spaces, single quotes, semicolons.
+- Numeric types and math follow `math.mdc`.

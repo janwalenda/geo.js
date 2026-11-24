@@ -14,9 +14,14 @@ versions may contain breaking changes).
 - Display list primitive `ImagePrimitive` (`type: 'image'`) plus types `AffineMatrix`, `ShapePrimitive` and helper `affineFromTriangle`
 - `CanvasRenderer.loadTextures(list)` and `onTextureLoad`; Canvas skips pieces whose image is still loading
 - Demo page `textures.html` (Canvas vs. SVG, affine vs. subdivided)
+- `Mat4.setRows(r0, r1, r2, r3)` – set a matrix row by row
+- Type `SceneOptions` (options of `Scene`, previously an inline type)
+- Tooling: ESLint (strict type-checked typescript-eslint, JSDoc, import sorting, project rules for type/code and class/helper separation) and Prettier (80 columns); `npm run lint`, `npm run format`, and `npm run check` for everything CI runs
 
 ### Changed
 - `Primitive` now includes `ImagePrimitive`, which has no `fill`/`stroke`: narrow by `type` before reading them. `Shape2D.toPrimitives()` returns `ShapePrimitive[]`
+- `Renderer.mimeType` and `Renderer.fileExtension` are abstract `readonly` properties instead of abstract getters (subclasses may still implement them as getters)
+- Source restructured without API changes: one class per file, exported types in each folder's `types.ts`, helpers in separate modules; the render pipeline is split into focused modules. Code style: 2 spaces, at most 80 columns
 
 ### Fixed
 - Depth sorting: large faces (e.g. floor tiles) were sometimes painted over objects standing on them, because faces were ordered by the distance of their center only. Faces that overlap on screen are now ordered by occlusion (plane tests, as in Newell's algorithm); everything else still by distance

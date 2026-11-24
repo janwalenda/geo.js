@@ -15,7 +15,7 @@ Every coherent piece of work is done on its own branch – never directly on
 | Branch    | Purpose                                                                  |
 |-----------|--------------------------------------------------------------------------|
 | `main`    | Released versions only. Every release commit has a tag `vX.Y.Z`.         |
-| `develop` | Integration branch for the next version. Always green (typecheck, tests, build). |
+| `develop` | Integration branch for the next version. Always green (`npm run check`). |
 
 Nothing is ever committed directly to `main` or `develop` – they are only merged into.
 
@@ -82,7 +82,7 @@ git checkout -b feature/GEO-12-math-core
 # … commit …
 
 # Finish a feature
-npm run typecheck && npm test && npm run build
+npm run check                                    # typecheck, lint, format, tests, build
 git push -u origin feature/GEO-12-math-core      # ALWAYS push before merging → CI runs on the branch
 # … wait for the branch's CI run; if red, fix and push again, do not merge …
 git checkout develop && git pull
@@ -141,7 +141,7 @@ then `git flow feature start GEO-12-math-core` (finish with a squash as above, n
   Related code belongs in **one** branch; unrelated changes in separate ones.
 - **No feature and no fix without tests** – see `testing.mdc`. A `feature/` or `bugfix/` branch
   that changes code is not merged into `develop` without matching new/updated tests.
-- Before merging into `develop`: `npm run typecheck && npm test && npm run build` must be green.
+- Before merging into `develop`: `npm run check` must be green.
 - **Every `feature/`, `bugfix/` and `hotfix/` branch is pushed before it is merged**
   (`git push -u origin <branch>`), so it is visible on GitHub and CI runs on it.
   Merge only once the branch's CI run is green. Also applies to docs/rules-only branches.

@@ -12,7 +12,7 @@
 
 - [ ] Branch is rebased on the current `develop` and the PR targets `develop`
 - [ ] PR title is a Conventional Commit (it becomes the squash commit subject)
-- [ ] `npm run typecheck && npm test && npm run build && npm run test:dist` is green locally
+- [ ] `npm run check` is green locally
 - [ ] Tests added / updated
 - [ ] Canvas and SVG output checked (for rendering changes)
 - [ ] `CHANGELOG.md` (`[Unreleased]`) and `README.md` updated if needed
