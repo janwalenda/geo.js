@@ -18,6 +18,9 @@ versions may contain breaking changes).
 ### Changed
 - `Primitive` now includes `ImagePrimitive`, which has no `fill`/`stroke`: narrow by `type` before reading them. `Shape2D.toPrimitives()` returns `ShapePrimitive[]`
 
+### Fixed
+- Depth sorting: large faces (e.g. floor tiles) were sometimes painted over objects standing on them, because faces were ordered by the distance of their center only. Faces that overlap on screen are now ordered by occlusion (plane tests, as in Newell's algorithm); everything else still by distance
+
 ## [0.1.2] - 2026-11-24
 
 ### Added

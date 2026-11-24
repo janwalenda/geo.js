@@ -12,6 +12,7 @@ import { Points } from '../scene/Points';
 import { Polyline } from '../scene/Polyline';
 import { Scene } from '../scene/Scene';
 import type { DisplayList, Primitive, PrimitiveStyle } from './DisplayList';
+import { type DepthItem, depthOrder } from './depthOrder';
 import { affineFromTriangle, autoTextureDetail, inflatePolygon } from './textureMapping';
 
 export interface CompileOptions {
@@ -19,7 +20,10 @@ export interface CompileOptions {
     width: number;
     /** Viewport height in CSS pixels. */
     height: number;
-    /** Sort primitives back to front (painter's algorithm). Default `true`. */
+    /**
+     * Sort primitives back to front (painter's algorithm). Faces that overlap on screen
+     * are ordered by occlusion, everything else by distance. Default `true`.
+     */
     sort?: boolean;
     /**
      * Width (px) of a hairline outline in the fill color that hides anti-aliasing
@@ -44,6 +48,18 @@ interface Context {
     height: number;
     seams: number;
     lights: Lights;
+}
+
+/** Primitives emitted so far, grouped per face / line / point (the units that get sorted). */
+interface Output {
+    primitives: Primitive[];
+    groups: Group[];
+}
+
+interface Group extends DepthItem {
+    /** Range `[start, end)` of this group in `Output.primitives`. */
+    start: number;
+    end: number;
 }
 
 const BLACK = new Color(0, 0, 0);
@@ -71,15 +87,20 @@ export function compile(scene: Object3D, camera: Camera, options: CompileOptions
         lights: collectLights(scene),
     };
 
-    const primitives: Primitive[] = [];
+    const out: Output = { primitives: [], groups: [] };
     scene.traverseVisible((object) => {
-        if (object instanceof Mesh) compileMesh(object, ctx, primitives);
-        else if (object instanceof Polyline) compilePolyline(object, ctx, primitives);
-        else if (object instanceof Points) compilePoints(object, ctx, primitives);
+        if (object instanceof Mesh) compileMesh(object, ctx, out);
+        else if (object instanceof Polyline) compilePolyline(object, ctx, out);
+        else if (object instanceof Points) compilePoints(object, ctx, out);
     });
 
-    // Array.prototype.sort is stable, so equal depths keep scene order.
-    if (options.sort !== false) primitives.sort((a, b) => b.depth - a.depth);
+    let primitives = out.primitives;
+    if (options.sort !== false) {
+        primitives = [];
+        for (const g of depthOrder(out.groups).map((i) => out.groups[i])) {
+            for (let i = g.start; i < g.end; i++) primitives.push(out.primitives[i]);
+        }
+    }
 
     const background = scene instanceof Scene && scene.background ? scene.background.toCSS() : null;
     return { width, height, background, primitives };
@@ -120,7 +141,12 @@ function collectLights(scene: Object3D): Lights {
     return lights;
 }
 
-function compileMesh(mesh: Mesh, ctx: Context, out: Primitive[]): void {
+/** Record the primitives pushed since `start` as one sortable group. */
+function group(out: Output, start: number, depth: number, polygon: Vec3[] | null, screen: number[] | null): void {
+    if (out.primitives.length > start) out.groups.push({ depth, polygon, screen, start, end: out.primitives.length });
+}
+
+function compileMesh(mesh: Mesh, ctx: Context, out: Output): void {
     const { geometry, material } = mesh;
     const uvs = material.map && !material.wireframe ? geometry.uvs : null;
     const world = geometry.vertices.map((v) => v.clone().applyMat4(mesh.worldMatrix));
@@ -158,11 +184,13 @@ function compileMesh(mesh: Mesh, ctx: Context, out: Primitive[]): void {
         center.scale(1 / face.length);
 
         const depth = averageDistance(clipped);
+        const start = out.primitives.length;
         if (material.map && faceUVs && faceUVs.length === face.length) {
-            compileTexturedFace(material, material.map.src, clippedCorners, points, depth, normal, center, ctx, out);
-            continue;
+            compileTexturedFace(material, material.map.src, clippedCorners, points, depth, normal, center, ctx, out.primitives);
+        } else {
+            out.primitives.push({ type: 'polygon', points, depth, ...faceStyle(material, normal, center, ctx) });
         }
-        out.push({ type: 'polygon', points, depth, ...faceStyle(material, normal, center, ctx) });
+        group(out, start, depth, clipped, points);
     }
 }
 
@@ -178,7 +206,7 @@ const ZERO_UV = new Vec2(0, 0);
  * Emit a textured face: fan-triangulate the (near-clipped) polygon, subdivide each
  * triangle against affine distortion and map the texture onto every piece. Lighting
  * is a black overlay over the whole face whose opacity darkens it like flat shading.
- * All pieces share the face depth, so sorting keeps them together and in order.
+ * All pieces share the face depth and are sorted as one group, so they stay together and in order.
  */
 function compileTexturedFace(
     material: Material, src: string, corners: Corner[], points: number[], depth: number,
@@ -255,7 +283,7 @@ function pushTexturedTriangle(
     out.push({ type: 'image', src, transform, points: inflatePolygon(xy, inflate), opacity, depth });
 }
 
-function compilePolyline(line: Polyline, ctx: Context, out: Primitive[]): void {
+function compilePolyline(line: Polyline, ctx: Context, out: Output): void {
     if (line.points.length < 2) return;
     const view = line.points.map((p) => p.clone().applyMat4(line.worldMatrix).applyMat4(ctx.view));
     const path = line.closed ? [...view, view[0]] : view;
@@ -288,17 +316,14 @@ function compilePolyline(line: Polyline, ctx: Context, out: Primitive[]): void {
     const unclippedLoop = line.closed && runs.length === 1 && runs[0].length === path.length;
     for (const r of runs) {
         const points = unclippedLoop ? r.slice(0, -1) : r;
-        out.push({
-            type: 'polyline',
-            points: projectAll(points, ctx),
-            closed: unclippedLoop,
-            depth: averageDistance(points),
-            ...style,
-        });
+        const start = out.primitives.length;
+        const depth = averageDistance(points);
+        out.primitives.push({ type: 'polyline', points: projectAll(points, ctx), closed: unclippedLoop, depth, ...style });
+        group(out, start, depth, null, null);
     }
 }
 
-function compilePoints(cloud: Points, ctx: Context, out: Primitive[]): void {
+function compilePoints(cloud: Points, ctx: Context, out: Output): void {
     const { material } = cloud;
     const fill = material.fill?.toCSS() ?? null;
     const stroke = material.stroke?.toCSS() ?? null;
@@ -306,7 +331,8 @@ function compilePoints(cloud: Points, ctx: Context, out: Primitive[]): void {
         const v = p.clone().applyMat4(cloud.worldMatrix).applyMat4(ctx.view);
         if (v.z > -ctx.near || v.z < -ctx.far) continue;
         const [x, y] = projectAll([v], ctx);
-        out.push({
+        const start = out.primitives.length;
+        out.primitives.push({
             type: 'circle',
             x,
             y,
@@ -317,6 +343,7 @@ function compilePoints(cloud: Points, ctx: Context, out: Primitive[]): void {
             lineWidth: material.lineWidth,
             opacity: material.opacity,
         });
+        group(out, start, -v.z, null, null);
     }
 }
 
