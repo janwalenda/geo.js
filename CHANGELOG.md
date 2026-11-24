@@ -7,6 +7,8 @@ versions may contain breaking changes).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-24
+
 ### Added
 - Export of the current frame on every renderer: `download(filename?)`, `createDownloadLink({ filename, text })`, `toBlob()`, `toDataURL()`, plus `mimeType` and `fileExtension`
 - `SVGRenderer` exports SVG and gains `toSVGString()` for the live `<svg>` element
@@ -52,6 +54,7 @@ Complete rewrite of the engine on a tested mathematical core.
 - SVG paths were filled black while canvas only stroked them
 - Wrong rotation matrices for arbitrary axes, flipped triangle normals after rotation, broken icosphere subdivision, and UV spheres without faces (all fixed by the rewrite)
 
-[Unreleased]: https://github.com/janwalenda/geo.js/compare/v0.1.1...develop
+[Unreleased]: https://github.com/janwalenda/geo.js/compare/v0.1.2...develop
+[0.1.2]: https://github.com/janwalenda/geo.js/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/janwalenda/geo.js/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/janwalenda/geo.js/releases/tag/v0.1.0
