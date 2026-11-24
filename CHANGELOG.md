@@ -7,6 +7,12 @@ versions may contain breaking changes).
 
 ## [Unreleased]
 
+### Added
+- Export of the current frame on every renderer: `download(filename?)`, `createDownloadLink({ filename, text })`, `toBlob()`, `toDataURL()`, plus `mimeType` and `fileExtension`
+- `SVGRenderer` exports SVG and gains `toSVGString()` for the live `<svg>` element
+- `CanvasRenderer` exports PNG by default; new options `imageType` (`'image/png' | 'image/jpeg' | 'image/webp'`) and `imageQuality`; new type `CanvasImageType`
+- Demo: "Download PNG" / "Download SVG" buttons
+
 ## [0.1.1] - 2026-11-17
 
 Maintenance release with no changes to the public API.

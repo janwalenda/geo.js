@@ -20,7 +20,10 @@
       .views { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
       figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
       figcaption { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--line); }
-      figcaption span { color: var(--muted); font-variant-numeric: tabular-nums; }
+      figcaption { align-items: center; gap: 8px; }
+      figcaption span { color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; }
+      figcaption button { font: inherit; font-size: 12px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--text); cursor: pointer; }
+      figcaption button:hover { background: var(--bg); }
       .surface { display: block; width: 100%; aspect-ratio: 4 / 3; touch-action: none; cursor: grab; }
       .surface > * { display: block; }
     </style>
@@ -31,8 +34,8 @@
       <p>One scene, one math pipeline, two renderers. Drag to orbit.</p>
       <div class="controls" id="controls"></div>
       <div class="views">
-        <figure><figcaption>Canvas 2D <span id="canvas-stats"></span></figcaption><div class="surface" id="canvas"></div></figure>
-        <figure><figcaption>SVG <span id="svg-stats"></span></figcaption><div class="surface" id="svg"></div></figure>
+        <figure><figcaption>Canvas 2D <span id="canvas-stats"></span><button type="button" id="canvas-download">Download PNG</button></figcaption><div class="surface" id="canvas"></div></figure>
+        <figure><figcaption>SVG <span id="svg-stats"></span><button type="button" id="svg-download">Download SVG</button></figcaption><div class="surface" id="svg"></div></figure>
       </div>
     </main>
     <script type="module" src="/demo/main.ts"></script>

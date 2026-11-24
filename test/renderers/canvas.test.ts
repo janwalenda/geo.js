@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+// @vitest-environment jsdom
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DisplayList } from '../../src/render';
 import { CanvasRenderer } from '../../src/renderers/CanvasRenderer';
 
@@ -18,8 +19,19 @@ function fakeCanvas() {
         fill: () => calls.push(`fill ${ctx.fillStyle} α${ctx.globalAlpha}`),
         stroke: () => calls.push(`stroke ${ctx.strokeStyle} ${ctx.lineWidth} α${ctx.globalAlpha}`),
     };
-    const canvas = { width: 0, height: 0, style: { width: '', height: '' }, getContext: () => ctx };
-    return { canvas: canvas as unknown as HTMLCanvasElement, calls, ctx };
+    const exports: { type?: string; quality?: number }[] = [];
+    const canvas = {
+        width: 0, height: 0, style: { width: '', height: '' }, getContext: () => ctx,
+        toDataURL: (type?: string, quality?: number) => {
+            exports.push({ type, quality });
+            return `data:${type};base64,AAAA`;
+        },
+        toBlob: (callback: (blob: Blob | null) => void, type?: string, quality?: number) => {
+            exports.push({ type, quality });
+            callback(type === 'image/broken' ? null : new Blob(['img'], { type }));
+        },
+    };
+    return { canvas: canvas as unknown as HTMLCanvasElement, calls, ctx, exports };
 }
 
 const list: DisplayList = {
@@ -60,5 +72,73 @@ describe('CanvasRenderer', () => {
     it('throws a clear error without a 2D context', () => {
         const canvas = { getContext: () => null } as unknown as HTMLCanvasElement;
         expect(() => new CanvasRenderer({ canvas })).toThrow(/2D context/);
+    });
+});
+
+describe('CanvasRenderer export', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.useRealTimers();
+    });
+
+    it('exports PNG by default', async () => {
+        const { canvas, exports } = fakeCanvas();
+        const renderer = new CanvasRenderer({ canvas });
+        expect(renderer.mimeType).toBe('image/png');
+        expect(renderer.fileExtension).toBe('png');
+        expect(renderer.toDataURL()).toBe('data:image/png;base64,AAAA');
+        const blob = await renderer.toBlob();
+        expect(blob.type).toBe('image/png');
+        expect(exports).toEqual([{ type: 'image/png', quality: undefined }, { type: 'image/png', quality: undefined }]);
+    });
+
+    it('passes image type and quality through and picks the matching extension', async () => {
+        const { canvas, exports } = fakeCanvas();
+        const renderer = new CanvasRenderer({ canvas, imageType: 'image/jpeg', imageQuality: 0.8 });
+        expect(renderer.fileExtension).toBe('jpg');
+        await renderer.toBlob();
+        expect(exports).toEqual([{ type: 'image/jpeg', quality: 0.8 }]);
+        renderer.imageType = 'image/webp';
+        expect(renderer.fileExtension).toBe('webp');
+        expect(renderer.createDownloadLink().download).toBe('geo.webp');
+    });
+
+    it('rejects when the canvas cannot be encoded', async () => {
+        const { canvas } = fakeCanvas();
+        const renderer = new CanvasRenderer({ canvas });
+        (renderer as { imageType: string }).imageType = 'image/broken';
+        await expect(renderer.toBlob()).rejects.toThrow(/could not be encoded/);
+    });
+
+    it('creates a download link with a data URL snapshot', () => {
+        const { canvas } = fakeCanvas();
+        const link = new CanvasRenderer({ canvas }).createDownloadLink({ filename: 'scene.png', text: 'Save' });
+        expect(link.tagName).toBe('A');
+        expect(link.href).toBe('data:image/png;base64,AAAA');
+        expect(link.download).toBe('scene.png');
+        expect(link.type).toBe('image/png');
+        expect(link.textContent).toBe('Save');
+    });
+
+    it('downloads through a temporary object URL that is revoked afterwards', async () => {
+        vi.useFakeTimers();
+        const create = vi.fn((_: Blob) => 'blob:geo-1');
+        const revoke = vi.fn();
+        Object.assign(URL, { createObjectURL: create, revokeObjectURL: revoke });
+        let clicked: HTMLAnchorElement | undefined;
+        vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+            clicked = this;
+            expect(document.body.contains(this)).toBe(true);
+        });
+
+        const { canvas } = fakeCanvas();
+        await new CanvasRenderer({ canvas }).download();
+        expect(create.mock.calls[0][0].type).toBe('image/png');
+        expect(clicked?.href).toBe('blob:geo-1');
+        expect(clicked?.download).toBe('geo.png');
+        expect(document.body.contains(clicked ?? null)).toBe(false);
+        expect(revoke).not.toHaveBeenCalled();
+        vi.runAllTimers();
+        expect(revoke).toHaveBeenCalledWith('blob:geo-1');
     });
 });

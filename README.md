@@ -8,6 +8,7 @@ A math-based 3D engine (plus 2D shapes) written in TypeScript. It renders the
 - **Geometry:** box, plane, UV sphere, tetra-, octa- and icosahedron (geodesic), torus, cylinder, cone, and `ParametricGeometry` for any surface `f(u, v)`
 - **Pipeline:** near-plane clipping, projection, back-face culling, flat shading and painter's sorting into a renderer-neutral **display list**
 - **Renderers:** `CanvasRenderer` (high-DPI), `SVGRenderer` (reuses elements between frames) and `toSVGString` (no DOM, for Node and SSR)
+- **Export:** save any frame as SVG or PNG/JPEG/WebP – as a download, a download link, a `Blob` or a data URL
 - **2D:** `Circle`, `Rect`, `Ellipse`, `Polygon`, `Line`, `RegularPolygon`, `FunctionGraph`, `ParametricCurve`, `SineWave`
 
 ## Installation
@@ -58,6 +59,36 @@ renderer.render2D([
 // 2D shapes can also be drawn on top of a 3D scene:
 // renderer.render(scene, camera, [new Circle({ ... })]);
 ```
+
+### Downloading a frame (SVG, PNG, …)
+
+Every renderer can export the frame it has drawn last. `SVGRenderer` exports SVG,
+`CanvasRenderer` exports PNG by default (or `image/jpeg` / `image/webp` via `imageType`)
+at full high-DPI resolution.
+
+```ts
+import { CanvasRenderer, Circle, SVGRenderer } from '@janwalenda/geo';
+
+const svg = new SVGRenderer({ width: 300, height: 200 });
+svg.render2D([new Circle({ position: [150, 100], radius: 40, fill: '#4f7cff' })], '#ffffff');
+
+// A ready-made <a download> link with a snapshot of the current frame
+document.body.appendChild(svg.createDownloadLink({ filename: 'circle.svg', text: 'Save SVG' }));
+
+// Or trigger the download directly, e.g. from a button
+button.addEventListener('click', () => svg.download('circle.svg'));
+
+const canvas = new CanvasRenderer({ width: 300, height: 200, imageType: 'image/png' });
+await canvas.download('scene.png');      // → scene.png
+const blob = await canvas.toBlob();      // e.g. for upload
+const url = canvas.toDataURL();          // data:image/png;base64,…
+const markup = svg.toSVGString();        // '<svg xmlns=…>…</svg>'
+```
+
+`createDownloadLink()` uses a `data:` URL, so the link needs no cleanup and keeps
+the frame it was created from. `download()` uses a temporary object URL instead,
+which also works for very large canvases. JPEG has no transparency – give the scene a
+`background` when exporting JPEG.
 
 ### Server-side rendering / export (no DOM)
 
