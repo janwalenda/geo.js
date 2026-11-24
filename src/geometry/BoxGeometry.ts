@@ -1,7 +1,8 @@
+import { Vec2 } from '../math/Vec2';
 import { Vec3 } from '../math/Vec3';
 import { Geometry } from './Geometry';
 
-/** Axis-aligned box centered at the origin, made of six quads. */
+/** Axis-aligned box centered at the origin, made of six quads. Every face shows the whole texture. */
 export class BoxGeometry extends Geometry {
     constructor(width = 1, height = 1, depth = 1) {
         const x = width / 2, y = height / 2, z = depth / 2;
@@ -18,5 +19,7 @@ export class BoxGeometry extends Geometry {
             [6, 7, 3, 2], // +Y
             [0, 1, 5, 4], // −Y
         ]);
+        // Each face starts at its bottom-left corner (seen from outside) and runs CCW.
+        this.uvs = this.faces.map(() => [new Vec2(0, 1), new Vec2(1, 1), new Vec2(1, 0), new Vec2(0, 0)]);
     }
 }

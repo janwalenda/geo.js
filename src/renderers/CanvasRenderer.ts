@@ -1,4 +1,4 @@
-import type { DisplayList, Primitive } from '../render/DisplayList';
+import type { DisplayList, ImagePrimitive, Primitive } from '../render/DisplayList';
 import { Renderer, type RendererOptions } from './Renderer';
 
 export interface CanvasRendererOptions extends RendererOptions {
@@ -27,6 +27,13 @@ export class CanvasRenderer extends Renderer {
     pixelRatio: number;
     imageType: CanvasImageType;
     imageQuality: number | undefined;
+    /**
+     * Called once a texture image has finished loading (e.g. to redraw a static scene).
+     * Textured pieces whose image is not loaded yet are skipped when drawing.
+     */
+    onTextureLoad: ((src: string) => void) | null = null;
+    private images = new Map<string, HTMLImageElement>();
+    private pending = new Map<string, Promise<void>>();
 
     constructor(options: CanvasRendererOptions = {}) {
         super(options);
@@ -92,7 +99,68 @@ export class CanvasRenderer extends Renderer {
         ctx.globalAlpha = 1;
     }
 
+    /**
+     * Start loading every texture used by `list` and resolve once all are loaded
+     * (failed images resolve too and stay invisible). Useful before a single static draw.
+     */
+    loadTextures(list: DisplayList): Promise<void> {
+        const waits: Promise<void>[] = [];
+        for (const p of list.primitives) {
+            if (p.type !== 'image') continue;
+            this.image(p.src);
+            const wait = this.pending.get(p.src);
+            if (wait) waits.push(wait);
+        }
+        return Promise.all(waits).then(() => undefined);
+    }
+
+    /** Cached image for `src`, created (and loading) on first use. */
+    private image(src: string): HTMLImageElement {
+        let img = this.images.get(src);
+        if (!img) {
+            const fresh = new Image();
+            img = fresh;
+            this.images.set(src, fresh);
+            this.pending.set(src, new Promise<void>((resolve) => {
+                const done = () => {
+                    this.pending.delete(src);
+                    resolve();
+                };
+                fresh.onload = () => {
+                    done();
+                    this.onTextureLoad?.(src);
+                };
+                fresh.onerror = done;
+            }));
+            fresh.src = src;
+        }
+        return img;
+    }
+
+    /** Clip to the piece's polygon, then draw the image as the unit square under its affine map. */
+    private drawImagePiece(p: ImagePrimitive): void {
+        const img = this.image(p.src);
+        if (!img.complete || img.naturalWidth === 0) return;
+        const ctx = this.context;
+        const r = this.pixelRatio;
+        const [a, b, c, d, e, f] = p.transform;
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.beginPath();
+        ctx.moveTo(p.points[0], p.points[1]);
+        for (let i = 2; i < p.points.length; i += 2) ctx.lineTo(p.points[i], p.points[i + 1]);
+        ctx.closePath();
+        ctx.clip();
+        ctx.setTransform(a * r, b * r, c * r, d * r, e * r, f * r);
+        ctx.drawImage(img, 0, 0, 1, 1);
+        ctx.restore();
+    }
+
     private drawPrimitive(p: Primitive): void {
+        if (p.type === 'image') {
+            this.drawImagePiece(p);
+            return;
+        }
         const ctx = this.context;
         ctx.globalAlpha = p.opacity;
         ctx.beginPath();

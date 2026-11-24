@@ -60,6 +60,29 @@ describe('compile', () => {
         expect(result[0].depth).toBeGreaterThan(result[1].depth);
     });
 
+    it('draws a large floor face before an object standing on it, even if its center is nearer', () => {
+        // The floor's center is ~6.4 from the camera, the box ~8.7: sorting by center
+        // distance alone would paint the floor over the whole box.
+        const floor = new Mesh(new PlaneGeometry(12, 12), new Material({ fill: '#00ff00', lit: false }));
+        floor.rotateX(-Math.PI / 2);
+        const box = new Mesh(new BoxGeometry(), new Material({ fill: '#ff0000', lit: false }));
+        box.position.set(0, 0.5, -3);
+        const cam = new PerspectiveCamera({ fov: 60 });
+        cam.position.set(0, 4, 5);
+        cam.lookAt(new Vec3(0, 0, -1));
+        const fills = polygons(new Scene().add(box, floor), cam).map((p) => p.fill);
+        expect(fills.filter((f) => f === '#ff0000')).toHaveLength(2);
+        expect(fills[0]).toBe('#00ff00');
+    });
+
+    it('keeps plain depth order for faces whose screen areas do not overlap', () => {
+        const left = new Mesh(new PlaneGeometry(), new Material({ fill: '#ff0000', lit: false }));
+        const right = new Mesh(new PlaneGeometry(), new Material({ fill: '#0000ff', lit: false }));
+        left.position.set(-1.5, 0, -2);
+        right.position.set(1.5, 0, 0);
+        expect(polygons(new Scene().add(right, left)).map((p) => p.fill)).toEqual(['#ff0000', '#0000ff']);
+    });
+
     it('clips polygons at the near plane instead of projecting through the camera', () => {
         // A floor stretching from far in front of the camera to far behind it.
         const floor = new Mesh(new PlaneGeometry(10, 40));

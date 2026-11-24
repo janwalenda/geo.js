@@ -3,7 +3,7 @@ import { expectVec } from '../helpers';
 import { Geometry } from '../../src/geometry';
 import { Vec3 } from '../../src/math';
 import {
-    Color, DirectionalLight, Material, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Scene,
+    Color, DirectionalLight, Material, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Scene, Texture,
 } from '../../src/scene/index';
 
 describe('Color', () => {
@@ -146,5 +146,21 @@ describe('Geometry', () => {
         const copy = quad.clone();
         copy.vertices[0].x = 99;
         expect(quad.vertices[0].x).toBe(0);
+    });
+});
+
+describe('Material textures', () => {
+    it('accepts a Texture or a URL and clones it', () => {
+        const m = new Material({ map: 'wood.png', textureDetail: 4 });
+        expect(m.map).toBeInstanceOf(Texture);
+        expect(m.map?.src).toBe('wood.png');
+        const copy = m.clone();
+        expect(copy.map?.src).toBe('wood.png');
+        expect(copy.map).not.toBe(m.map);
+        expect(copy.textureDetail).toBe(4);
+        const t = new Texture('a.png');
+        expect(new Material({ map: t }).map).toBe(t);
+        expect(new Material().map).toBeNull();
+        expect(new Material().textureDetail).toBe('auto');
     });
 });

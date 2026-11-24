@@ -1,3 +1,4 @@
+import { Vec2 } from '../math/Vec2';
 import type { Vec3 } from '../math/Vec3';
 import { Geometry } from './Geometry';
 
@@ -18,6 +19,8 @@ export interface ParametricOptions {
 /**
  * Surface of a function `f(u, v)` sampled on a grid of quads – the general tool for
  * plotting mathematical surfaces. The front side is where `∂f/∂u × ∂f/∂v` points.
+ * UVs: texture point `(u, 1 − v)` ↦ `f(u, v)`, so the image reads unmirrored from the
+ * front side (image right = ∂f/∂u, image up = ∂f/∂v).
  */
 export class ParametricGeometry extends Geometry {
     constructor(fn: ParametricFunction, options: ParametricOptions = {}) {
@@ -34,11 +37,16 @@ export class ParametricGeometry extends Geometry {
         }
         const index = (i: number, j: number) => (j % rows) * columns + (i % columns);
         const faces: number[][] = [];
+        const uvs: Vec2[][] = [];
         for (let j = 0; j < nv; j++) {
             for (let i = 0; i < nu; i++) {
                 faces.push([index(i, j), index(i + 1, j), index(i + 1, j + 1), index(i, j + 1)]);
+                uvs.push([
+                    new Vec2(i / nu, 1 - j / nv), new Vec2((i + 1) / nu, 1 - j / nv),
+                    new Vec2((i + 1) / nu, 1 - (j + 1) / nv), new Vec2(i / nu, 1 - (j + 1) / nv),
+                ]);
             }
         }
-        super(vertices, faces);
+        super(vertices, faces, uvs);
     }
 }

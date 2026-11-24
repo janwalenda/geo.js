@@ -1,4 +1,5 @@
 import type { Mat4 } from '../math/Mat4';
+import { Vec2 } from '../math/Vec2';
 import { Vec3 } from '../math/Vec3';
 
 /**
@@ -6,9 +7,13 @@ import { Vec3 } from '../math/Vec3';
  * Faces may have three or more vertices (quads stay quads, which gives cleaner
  * Canvas/SVG output). Faces are planar, convex and counter-clockwise when seen
  * from the front (outside).
+ *
+ * `uvs` optionally holds texture coordinates per face corner: `uvs[f][k]` belongs to
+ * vertex `faces[f][k]`. Per-corner UVs allow seams (box faces, the wrap of a sphere).
+ * Texture space: `(0, 0)` top-left, `(1, 1)` bottom-right of the image.
  */
 export class Geometry {
-    constructor(public vertices: Vec3[] = [], public faces: number[][] = []) {}
+    constructor(public vertices: Vec3[] = [], public faces: number[][] = [], public uvs: Vec2[][] | null = null) {}
 
     /** Unit normal of face `index` (Newell's method, robust for any planar polygon). */
     faceNormal(index: number, out = new Vec3()): Vec3 {
@@ -57,6 +62,10 @@ export class Geometry {
     }
 
     clone(): Geometry {
-        return new Geometry(this.vertices.map((v) => v.clone()), this.faces.map((f) => [...f]));
+        return new Geometry(
+            this.vertices.map((v) => v.clone()),
+            this.faces.map((f) => [...f]),
+            this.uvs?.map((f) => f.map((uv) => uv.clone())) ?? null,
+        );
     }
 }

@@ -18,6 +18,10 @@ function fakeCanvas() {
         arc: (x: number, y: number, r: number) => calls.push(`arc ${x},${y},${r}`),
         fill: () => calls.push(`fill ${ctx.fillStyle} α${ctx.globalAlpha}`),
         stroke: () => calls.push(`stroke ${ctx.strokeStyle} ${ctx.lineWidth} α${ctx.globalAlpha}`),
+        save: () => calls.push('save'),
+        restore: () => calls.push('restore'),
+        clip: () => calls.push('clip'),
+        drawImage: (img: { src: string }, ...a: number[]) => calls.push(`drawImage ${img.src} ${a.join(',')} α${ctx.globalAlpha}`),
     };
     const exports: { type?: string; quality?: number }[] = [];
     const canvas = {
@@ -140,5 +144,68 @@ describe('CanvasRenderer export', () => {
         expect(revoke).not.toHaveBeenCalled();
         vi.runAllTimers();
         expect(revoke).toHaveBeenCalledWith('blob:geo-1');
+    });
+});
+
+describe('CanvasRenderer textures', () => {
+    /** Image stand-in: "loads" when `load()` is called. */
+    class FakeImage {
+        static all: FakeImage[] = [];
+        src = '';
+        complete = false;
+        naturalWidth = 0;
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor() {
+            FakeImage.all.push(this);
+        }
+        load(): void {
+            this.complete = true;
+            this.naturalWidth = 4;
+            this.onload?.();
+        }
+    }
+    const piece: DisplayList = {
+        width: 100, height: 50, background: null,
+        primitives: [{ type: 'image', src: 'tex.png', transform: [10, 0, 0, 20, 3, 4], points: [0, 0, 10, 0, 0, 10], opacity: 0.5, depth: 0 }],
+    };
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        FakeImage.all = [];
+    });
+
+    it('skips pieces until the image is loaded, then clips and draws it under the affine map', async () => {
+        vi.stubGlobal('Image', FakeImage);
+        const { canvas, calls } = fakeCanvas();
+        const renderer = new CanvasRenderer({ canvas, width: 100, height: 50, pixelRatio: 2 });
+        const loaded = vi.fn();
+        renderer.onTextureLoad = loaded;
+        renderer.draw(piece);
+        expect(calls.some((c) => c.startsWith('drawImage'))).toBe(false);
+        expect(FakeImage.all).toHaveLength(1);
+        expect(FakeImage.all[0].src).toBe('tex.png');
+
+        const ready = renderer.loadTextures(piece);
+        FakeImage.all[0].load();
+        await ready;
+        expect(loaded).toHaveBeenCalledWith('tex.png');
+
+        calls.length = 0;
+        renderer.draw(piece);
+        expect(calls.slice(3)).toEqual([
+            'save', 'beginPath', 'moveTo 0,0', 'lineTo 10,0', 'lineTo 0,10', 'closePath', 'clip',
+            'setTransform(20,0,0,40,6,8)', 'drawImage tex.png 0,0,1,1 α0.5', 'restore',
+        ]);
+        expect(FakeImage.all).toHaveLength(1); // cached
+    });
+
+    it('resolves loadTextures for images that fail to load', async () => {
+        vi.stubGlobal('Image', FakeImage);
+        const { canvas } = fakeCanvas();
+        const renderer = new CanvasRenderer({ canvas });
+        const ready = renderer.loadTextures(piece);
+        FakeImage.all[0].onerror?.();
+        await expect(ready).resolves.toBeUndefined();
     });
 });

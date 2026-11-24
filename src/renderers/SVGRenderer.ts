@@ -1,6 +1,8 @@
 import type { DisplayList } from '../render/DisplayList';
 import { Renderer, type RendererOptions } from './Renderer';
-import { SVG_NS, attributesFor, backgroundAttributes, tagFor, type SVGTag } from './svgMarkup';
+import { SVG_NS, backgroundAttributes, nodeFor, textureNode, type SVGIds, type SVGNode } from './svgMarkup';
+
+let instances = 0;
 
 export interface SVGRendererOptions extends RendererOptions {
     /** Existing `<svg>` element to draw into; one is created otherwise. */
@@ -17,11 +19,33 @@ export class SVGRenderer extends Renderer {
     readonly domElement: SVGSVGElement;
     precision: number;
     private nodes: SVGElement[] = [];
+    /** Holds one `<image>` per texture, referenced by the pieces of textured faces. Created on first use. */
+    private defs: SVGElement | null = null;
+    private textures = new Map<string, string>();
+    private ids: SVGIds;
 
     constructor(options: SVGRendererOptions = {}) {
         super(options);
         this.domElement = options.svg ?? (document.createElementNS(SVG_NS, 'svg') as SVGSVGElement);
         this.precision = options.precision ?? 2;
+        // Ids must be unique in the whole document, also with several renderers on one page.
+        const prefix = `geo${instances++}`;
+        this.ids = {
+            clip: (index) => `${prefix}-clip-${index}`,
+            texture: (src) => {
+                let id = this.textures.get(src);
+                if (!id) {
+                    id = `${prefix}-tex-${this.textures.size}`;
+                    this.textures.set(src, id);
+                    if (!this.defs) {
+                        this.defs = document.createElementNS(SVG_NS, 'defs') as SVGElement;
+                        this.domElement.prepend(this.defs);
+                    }
+                    this.defs.appendChild(create(textureNode(id, src)));
+                }
+                return id;
+            },
+        };
         this.setSize(this.width, this.height);
     }
 
@@ -57,27 +81,50 @@ export class SVGRenderer extends Renderer {
 
     draw(list: DisplayList): void {
         let index = 0;
-        if (list.background) this.write(index++, 'rect', backgroundAttributes(list));
-        for (const p of list.primitives) this.write(index++, tagFor(p), attributesFor(p, this.precision));
+        if (list.background) this.write(index++, { tag: 'rect', attrs: backgroundAttributes(list) });
+        list.primitives.forEach((p, i) => this.write(index++, nodeFor(p, i, this.precision, this.ids)));
 
         // Remove nodes left over from a previous, larger frame.
         for (const node of this.nodes.splice(index)) node.remove();
     }
 
-    /** Make node `index` a `<tag>` with exactly `attrs`, reusing the existing node if possible. */
-    private write(index: number, tag: SVGTag, attrs: Record<string, string>): void {
-        let node = this.nodes[index];
-        if (!node || node.tagName !== tag) {
-            const fresh = document.createElementNS(SVG_NS, tag) as SVGElement;
-            if (node) node.replaceWith(fresh);
-            else this.domElement.appendChild(fresh);
-            node = this.nodes[index] = fresh;
+    /** Make top-level node `index` match `tree`, reusing the existing elements if possible. */
+    private write(index: number, tree: SVGNode): void {
+        const node = this.nodes[index];
+        if (node && node.tagName === tree.tag) {
+            sync(node, tree);
+            return;
         }
-        for (const name of node.getAttributeNames()) {
-            if (!(name in attrs)) node.removeAttribute(name);
-        }
-        for (const name in attrs) {
-            if (node.getAttribute(name) !== attrs[name]) node.setAttribute(name, attrs[name]);
-        }
+        const fresh = create(tree);
+        if (node) node.replaceWith(fresh);
+        else this.domElement.appendChild(fresh);
+        this.nodes[index] = fresh;
     }
+}
+
+function create(tree: SVGNode): SVGElement {
+    const node = document.createElementNS(SVG_NS, tree.tag) as SVGElement;
+    for (const name in tree.attrs) node.setAttribute(name, tree.attrs[name]);
+    for (const child of tree.children ?? []) node.appendChild(create(child));
+    return node;
+}
+
+/** Update `node` in place to exactly `tree` (attributes and children, recursively). */
+function sync(node: SVGElement, tree: SVGNode): void {
+    const { attrs } = tree;
+    for (const name of node.getAttributeNames()) {
+        if (!(name in attrs)) node.removeAttribute(name);
+    }
+    for (const name in attrs) {
+        if (node.getAttribute(name) !== attrs[name]) node.setAttribute(name, attrs[name]);
+    }
+    const children = tree.children ?? [];
+    const existing = Array.from(node.children) as SVGElement[];
+    children.forEach((child, i) => {
+        const current = existing[i];
+        if (current && current.tagName === child.tag) sync(current, child);
+        else if (current) current.replaceWith(create(child));
+        else node.appendChild(create(child));
+    });
+    for (const extra of existing.slice(children.length)) extra.remove();
 }

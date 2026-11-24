@@ -2,6 +2,7 @@ export { Color } from './Color';
 export type { ColorLike } from './Color';
 export { Material } from './Material';
 export type { MaterialOptions, Side } from './Material';
+export { Texture } from './Texture';
 export { Object3D } from './Object3D';
 export { Scene } from './Scene';
 export { Mesh } from './Mesh';

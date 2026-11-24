@@ -41,7 +41,31 @@ export interface CirclePrimitive extends PrimitiveStyle {
     depth: number;
 }
 
-export type Primitive = PolygonPrimitive | PolylinePrimitive | CirclePrimitive;
+/** Affine 2D transform `[a, b, c, d, e, f]` as in `CanvasRenderingContext2D.setTransform` / SVG `matrix()`. */
+export type AffineMatrix = [number, number, number, number, number, number];
+
+/**
+ * Piece of a texture: the image is mapped by `transform` from texture space (the unit
+ * square, `(0, 0)` = top-left of the image) to the screen and clipped to `points`.
+ * Textured faces are made of many of these (one per triangle).
+ */
+export interface ImagePrimitive {
+    type: 'image';
+    /** Image URL (see {@link Texture}). */
+    src: string;
+    /** Texture space → screen space (CSS pixels). */
+    transform: AffineMatrix;
+    /** Clip polygon in screen space, flat: [x0, y0, x1, y1, …]. */
+    points: number[];
+    /** Opacity in [0, 1]. */
+    opacity: number;
+    depth: number;
+}
+
+export type Primitive = PolygonPrimitive | PolylinePrimitive | CirclePrimitive | ImagePrimitive;
+
+/** Primitives drawn as a single plain SVG element / Canvas path. */
+export type ShapePrimitive = Exclude<Primitive, ImagePrimitive>;
 
 export interface DisplayList {
     /** Viewport width in CSS pixels. */

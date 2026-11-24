@@ -1,4 +1,5 @@
 import { Color, type ColorLike } from './Color';
+import { Texture } from './Texture';
 
 /** Which faces are drawn: those facing the camera, those facing away, or both. */
 export type Side = 'front' | 'back' | 'double';
@@ -20,6 +21,17 @@ export interface MaterialOptions {
     wireframe?: boolean;
     /** Radius of {@link Points} in CSS pixels. Default `3`. */
     pointSize?: number;
+    /**
+     * Image mapped onto the faces via the geometry's UVs (a {@link Texture} or an image URL).
+     * Faces of geometries without UVs fall back to `fill`. Default `null`.
+     */
+    map?: Texture | string | null;
+    /**
+     * Subdivisions per triangle edge for textured faces. Texture mapping in 2D is affine,
+     * so large faces seen at a steep angle distort; subdividing hides that.
+     * `'auto'` chooses 1–8 from the depth range of each triangle. Default `'auto'`.
+     */
+    textureDetail?: number | 'auto';
 }
 
 /**
@@ -35,6 +47,8 @@ export class Material {
     side: Side;
     wireframe: boolean;
     pointSize: number;
+    map: Texture | null;
+    textureDetail: number | 'auto';
 
     constructor(options: MaterialOptions = {}) {
         this.fill = options.fill === null ? null : Color.from(options.fill ?? '#d0d0d0');
@@ -45,6 +59,9 @@ export class Material {
         this.side = options.side ?? 'front';
         this.wireframe = options.wireframe ?? false;
         this.pointSize = options.pointSize ?? 3;
+        const map = options.map ?? null;
+        this.map = typeof map === 'string' ? new Texture(map) : map;
+        this.textureDetail = options.textureDetail ?? 'auto';
     }
 
     clone(): Material {
@@ -57,6 +74,8 @@ export class Material {
         m.side = this.side;
         m.wireframe = this.wireframe;
         m.pointSize = this.pointSize;
+        m.map = this.map?.clone() ?? null;
+        m.textureDetail = this.textureDetail;
         return m;
     }
 }
