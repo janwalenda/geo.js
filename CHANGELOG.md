@@ -13,6 +13,9 @@ versions may contain breaking changes).
 - `CanvasRenderer` exports PNG by default; new options `imageType` (`'image/png' | 'image/jpeg' | 'image/webp'`) and `imageQuality`; new type `CanvasImageType`
 - Demo: "Download PNG" / "Download SVG" buttons
 
+### Changed
+- CI uses `actions/checkout@v7` and `actions/setup-node@v7` (Node 24 runtime instead of the deprecated Node 20)
+
 ## [0.1.1] - 2026-11-17
 
 Maintenance release with no changes to the public API.
