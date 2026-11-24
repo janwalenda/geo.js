@@ -6,13 +6,27 @@ export interface CanvasRendererOptions extends RendererOptions {
     canvas?: HTMLCanvasElement;
     /** Device pixels per CSS pixel. Default `window.devicePixelRatio` or `1`. */
     pixelRatio?: number;
+    /**
+     * Image format of exports (`toDataURL`, `toBlob`, downloads). Default `'image/png'`.
+     * JPEG has no transparency: give the scene a background or it turns black.
+     */
+    imageType?: CanvasImageType;
+    /** Quality `0…1` for lossy formats (`image/jpeg`, `image/webp`). Default: browser default. */
+    imageQuality?: number;
 }
+
+/** Image formats a canvas can be exported as. */
+export type CanvasImageType = 'image/png' | 'image/jpeg' | 'image/webp';
+
+const EXTENSIONS: Record<CanvasImageType, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
 
 /** Renders into a `<canvas>` with the 2D context, sharp on high-DPI screens. */
 export class CanvasRenderer extends Renderer {
     readonly domElement: HTMLCanvasElement;
     readonly context: CanvasRenderingContext2D;
     pixelRatio: number;
+    imageType: CanvasImageType;
+    imageQuality: number | undefined;
 
     constructor(options: CanvasRendererOptions = {}) {
         super(options);
@@ -21,7 +35,33 @@ export class CanvasRenderer extends Renderer {
         if (!context) throw new Error('geo: canvas 2D context is not available');
         this.context = context;
         this.pixelRatio = options.pixelRatio ?? globalThis.devicePixelRatio ?? 1;
+        this.imageType = options.imageType ?? 'image/png';
+        this.imageQuality = options.imageQuality;
         this.setSize(this.width, this.height);
+    }
+
+    get mimeType(): string {
+        return this.imageType;
+    }
+
+    get fileExtension(): string {
+        return EXTENSIONS[this.imageType];
+    }
+
+    /** The current frame at full backing-store resolution (CSS size × `pixelRatio`). */
+    toDataURL(): string {
+        return this.domElement.toDataURL(this.imageType, this.imageQuality);
+    }
+
+    /** The current frame at full backing-store resolution (CSS size × `pixelRatio`). */
+    toBlob(): Promise<Blob> {
+        return new Promise((resolve, reject) => {
+            this.domElement.toBlob(
+                (blob) => (blob ? resolve(blob) : reject(new Error('geo: canvas could not be encoded as an image'))),
+                this.imageType,
+                this.imageQuality,
+            );
+        });
     }
 
     setSize(width: number, height: number): void {

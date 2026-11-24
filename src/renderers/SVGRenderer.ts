@@ -34,6 +34,27 @@ export class SVGRenderer extends Renderer {
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     }
 
+    get mimeType(): string {
+        return 'image/svg+xml';
+    }
+
+    get fileExtension(): string {
+        return 'svg';
+    }
+
+    /** The current frame as a standalone SVG document string (the live `<svg>` element, serialized). */
+    toSVGString(): string {
+        return new XMLSerializer().serializeToString(this.domElement);
+    }
+
+    toDataURL(): string {
+        return `data:${this.mimeType};charset=utf-8,${encodeURIComponent(this.toSVGString())}`;
+    }
+
+    toBlob(): Promise<Blob> {
+        return Promise.resolve(new Blob([this.toSVGString()], { type: this.mimeType }));
+    }
+
     draw(list: DisplayList): void {
         let index = 0;
         if (list.background) this.write(index++, 'rect', backgroundAttributes(list));

@@ -69,6 +69,10 @@ const views: { renderer: Renderer; host: HTMLElement; stats: HTMLElement }[] = [
     { renderer: svgRenderer, host: svgHost, stats: document.querySelector('#svg-stats')! },
 ];
 
+// Export the current frame of each view as a file.
+document.querySelector('#canvas-download')!.addEventListener('click', () => void canvasRenderer.download('geo-scene.png'));
+document.querySelector('#svg-download')!.addEventListener('click', () => void svgRenderer.download('geo-scene.svg'));
+
 function resize(): void {
     for (const { renderer, host } of views) renderer.setSize(host.clientWidth, host.clientHeight);
 }

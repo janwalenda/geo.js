@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BoxGeometry } from '../../src/geometry';
 import { Vec3 } from '../../src/math';
 import type { DisplayList } from '../../src/render';
@@ -75,5 +75,67 @@ describe('SVGRenderer', () => {
 
         renderer.setSize(60, 40);
         expect(renderer.domElement.getAttribute('viewBox')).toBe('0 0 60 40');
+    });
+});
+
+describe('SVGRenderer export', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.useRealTimers();
+    });
+
+    const drawn = () => {
+        const renderer = new SVGRenderer({ width: 100, height: 50 });
+        renderer.draw(list);
+        return renderer;
+    };
+
+    it('serializes the current frame like toSVGString', () => {
+        const renderer = drawn();
+        expect(renderer.mimeType).toBe('image/svg+xml');
+        expect(renderer.fileExtension).toBe('svg');
+        expect(renderer.toSVGString()).toBe(toSVGString(list));
+    });
+
+    it('encodes the SVG as a data URL that decodes back to the markup', () => {
+        const url = drawn().toDataURL();
+        const prefix = 'data:image/svg+xml;charset=utf-8,';
+        expect(url.startsWith(prefix)).toBe(true);
+        expect(url).not.toMatch(/[<>"# ]/); // safe inside href
+        expect(decodeURIComponent(url.slice(prefix.length))).toBe(toSVGString(list));
+    });
+
+    it('exports a Blob with the SVG markup', async () => {
+        const blob = await drawn().toBlob();
+        expect(blob.type).toBe('image/svg+xml');
+        expect(await blob.text()).toBe(toSVGString(list));
+    });
+
+    it('creates a download link that is a snapshot of the current frame', () => {
+        const renderer = drawn();
+        const link = renderer.createDownloadLink();
+        expect(link.download).toBe('geo.svg');
+        expect(link.type).toBe('image/svg+xml');
+        expect(link.textContent).toBe('Download geo.svg');
+        const href = link.href;
+        renderer.draw({ ...list, primitives: [] });
+        expect(link.href).toBe(href);
+        expect(renderer.createDownloadLink().href).not.toBe(href);
+    });
+
+    it('downloads through a temporary object URL', async () => {
+        vi.useFakeTimers();
+        const blobs: Blob[] = [];
+        const revoke = vi.fn();
+        Object.assign(URL, { createObjectURL: (b: Blob) => (blobs.push(b), 'blob:geo-svg'), revokeObjectURL: revoke });
+        const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+        await drawn().download('cube.svg');
+        expect(click).toHaveBeenCalledTimes(1);
+        const link = click.mock.contexts[0] as HTMLAnchorElement;
+        expect(link.download).toBe('cube.svg');
+        expect(await blobs[0].text()).toBe(toSVGString(list));
+        vi.runAllTimers();
+        expect(revoke).toHaveBeenCalledWith('blob:geo-svg');
     });
 });
