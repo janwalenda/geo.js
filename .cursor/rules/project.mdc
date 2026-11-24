@@ -1,60 +1,67 @@
 ---
-description: Projektziel, Architektur und Befehle von geo.js
+description: Project goal, architecture and commands of geo.js
 globs:
 alwaysApply: true
 ---
 
-# geo.js – Projektüberblick
+# geo.js – project overview
 
-**Ziel:** Eine auf Mathematik basierende 3D-Engine (plus 2D-Formen) in TypeScript,
-die dieselbe Szene gleichwertig nach **Canvas 2D** und **SVG** rendert und als
-npm-Paket (`@janwalenda/geo`) sowie als minifiziertes Browser-Bundle ausgeliefert wird.
+**Goal:** A mathematics-based 3D engine (plus 2D shapes) in TypeScript that renders
+the same scene equally to **Canvas 2D** and **SVG**, shipped as an npm package
+(`@janwalenda/geo`) and as a minified browser bundle.
 
-## Architektur (Schichten, Abhängigkeiten nur nach unten)
+## Architecture (layers, dependencies only point downwards)
 
 ```
-src/math/       Vec2, Vec3, Vec4, Mat3, Mat4, Quat, utils     – rein, kein DOM
-src/scene/      Object3D, Scene, Mesh, Polyline, Points,        – rein, kein DOM
+src/math/       Vec2, Vec3, Vec4, Mat3, Mat4, Quat, utils     – pure, no DOM
+src/scene/      Object3D, Scene, Mesh, Polyline, Points,        – pure, no DOM
                 Camera (Perspective/Orthographic), Lights, Material, Color
-src/geometry/   Geometry + Generatoren (Box, Plane, UVSphere,   – rein, kein DOM
+src/geometry/   Geometry + generators (Box, Plane, UVSphere,    – pure, no DOM
                 Tetra/Octa/Icosahedron, Torus, Cylinder, Cone,
                 Parametric)
-src/shapes/     2D-Formen (Shape2D: Circle, Rect, Ellipse,      – rein, kein DOM
+src/shapes/     2D shapes (Shape2D: Circle, Rect, Ellipse,      – pure, no DOM
                 Polygon, Line, FunctionGraph, ParametricCurve, …)
-src/render/     compile(): Szene + Kamera → DisplayList          – rein, kein DOM
-                (Transform → Near-Clipping → Projektion → Culling
-                 → Flat-Shading → Tiefensortierung)
-src/renderers/  CanvasRenderer, SVGRenderer, toSVGString,        – einzige Stelle mit DOM
+src/render/     compile(): scene + camera → DisplayList          – pure, no DOM
+                (transform → near clipping → projection → culling
+                 → flat shading → depth sorting)
+src/renderers/  CanvasRenderer, SVGRenderer, toSVGString,        – the only place with DOM
                 animate()
-src/index.ts    öffentliche API (alles, was exportiert wird, ist API)
+src/index.ts    public API (everything exported is API)
 ```
 
-Kernidee: Geometrie zeichnet sich **nie selbst**. Die Pipeline erzeugt eine
-renderer-neutrale **DisplayList** aus 2D-Primitiven (`polygon`, `polyline`,
-`circle`) mit fertig aufgelösten Stilen; Renderer übersetzen nur noch diese Liste.
-Ein neuer Renderer braucht deshalb nur `draw(list)`.
+Core idea: geometry **never draws itself**. The pipeline produces a
+renderer-neutral **DisplayList** of 2D primitives (`polygon`, `polyline`,
+`circle`, `image`) with fully resolved styles; renderers only translate this list.
+A new renderer therefore only needs `draw(list)`.
 
-## Befehle
+## Commands
 
-| Befehl              | Zweck |
-|---------------------|-------|
-| `npm run dev`       | Demo (`index.html`, `demo/`) mit Vite-Dev-Server |
+| Command             | Purpose |
+|---------------------|---------|
+| `npm run dev`       | Demo (`index.html`, `demo/`) with the Vite dev server |
 | `npm run typecheck` | `tsc --noEmit` (strict) |
-| `npm test`          | Vitest einmalig; `npm run test:watch` im Watch-Modus |
+| `npm test`          | Vitest once; `npm run test:watch` in watch mode |
 | `npm run build`     | Rollup: `dist/geo.js` (ESM), `geo.cjs`, `geo.min.js`, `geo.umd.min.js`, `geo.d.ts` |
-| `npm run test:dist` | Smoke-Test aller gebauten Einstiegspunkte (nach `build`) |
+| `npm run test:dist` | Smoke test of all built entry points (after `build`) |
 
-Weitere Orte: `demo/` (Vite-Demo, Canvas und SVG nebeneinander, `?static` friert ein),
-`test/` (**alle** Tests, Struktur wie `src/`, plus Helfer, README-Beispiele und
-Bundle-Smoke-Test `test/dist/verify-dist.mjs`),
-`rollup.config.mjs` (Library-Build), `CHANGELOG.md` (Keep a Changelog).
+Other places: `demo/` (Vite demo, Canvas and SVG side by side, `?static` freezes it),
+`test/` (**all** tests, structure mirrors `src/`, plus helpers, README examples and the
+bundle smoke test `test/dist/verify-dist.mjs`),
+`rollup.config.mjs` (library build), `CHANGELOG.md` (Keep a Changelog).
 
-## Leitplanken
+## Guard rails
 
-- Schichten unterhalb von `src/renderers/` dürfen **kein** `document`, `window`,
-  Canvas- oder SVG-API verwenden – sie müssen in Node testbar sein.
-- Canvas und SVG müssen für dieselbe DisplayList **dasselbe Bild** liefern
-  (gleiche Füllung, Kontur, Linienbreite, Deckkraft, Reihenfolge).
-- Öffentliche API nur über `src/index.ts` exportieren; jede sichtbare Änderung im
-  Abschnitt `[Unreleased]` von `CHANGELOG.md` vermerken (im selben Feature-Branch).
-- Beispiele in `README.md` werden von `test/readme.test.ts` ausgeführt – bei API-Änderungen beide anpassen.
+- Layers below `src/renderers/` must **not** use `document`, `window`,
+  Canvas or SVG APIs – they must be testable in Node.
+- Canvas and SVG must produce **the same image** for the same DisplayList
+  (same fill, stroke, line width, opacity, order).
+- Export public API only through `src/index.ts`; note every visible change in the
+  `[Unreleased]` section of `CHANGELOG.md` (in the same feature branch).
+- Examples in `README.md` are executed by `test/readme.test.ts` – update both on API changes.
+
+## Language
+
+**Everything written in this repository is in English:** code, identifiers, comments,
+JSDoc, README, CHANGELOG, CONTRIBUTING and all other docs, the agent rules in
+`.cursor/rules/` and `CLAUDE.md`, commit messages, branch names, issue and PR texts.
+(Agents may still answer the user in the user's language in chat.)

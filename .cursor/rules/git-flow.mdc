@@ -1,155 +1,155 @@
 ---
-description: Git-Flow-Branching-Modell, Branch-Namen, Commits und Merges für geo.js
+description: Git Flow branching model, branch names, commits and merges for geo.js
 globs:
 alwaysApply: true
 ---
 
-# Git Flow – verbindlich für dieses Repository
+# Git Flow – mandatory for this repository
 
-Dieses Projekt nutzt das klassische **Git-Flow-Modell** (Vincent Driessen).
-Jeder zusammenhängende Code entsteht auf einem eigenen Branch – nie direkt auf
-`main` oder `develop`.
+This project uses the classic **Git Flow model** (Vincent Driessen).
+Every coherent piece of work is done on its own branch – never directly on
+`main` or `develop`.
 
-## Dauerhafte Branches
+## Long-lived branches
 
-| Branch    | Zweck                                                                 |
-|-----------|-----------------------------------------------------------------------|
-| `main`    | Nur veröffentlichte Versionen. Jeder Release-Commit hat ein Tag `vX.Y.Z`. |
-| `develop` | Integrationszweig für die nächste Version. Immer grün (Typecheck, Tests, Build). |
+| Branch    | Purpose                                                                  |
+|-----------|--------------------------------------------------------------------------|
+| `main`    | Released versions only. Every release commit has a tag `vX.Y.Z`.         |
+| `develop` | Integration branch for the next version. Always green (typecheck, tests, build). |
 
-Auf `main` und `develop` wird **nie direkt committet** – nur gemergt.
+Nothing is ever committed directly to `main` or `develop` – they are only merged into.
 
-## Saubere Historie: Rebase + Squash
+## Clean history: rebase + squash
 
-`main` und `develop` haben eine **lineare Historie ohne Merge-Commits** (auf GitHub per Ruleset
-erzwungen, nur Squash-Merges erlaubt).
+`main` and `develop` have a **linear history without merge commits** (enforced on GitHub
+by a ruleset; only squash merges are allowed).
 
-- Ein Feature-/Bugfix-Branch wird vor dem Merge auf den aktuellen `develop` **rebased**
-  (`git rebase develop`), nie `develop` in den Branch gemergt.
-- Er landet als **genau ein Squash-Commit** auf `develop`. Betreff im Conventional-Commits-Format
-  mit der Branch-Nummer am Ende: `feat(render): add texture mapping (GEO-30)`. Der Text fasst
-  die Änderung zusammen und nennt die neuen Tests.
-- Releases und Hotfixes kommen per **Fast-Forward** (`--ff-only`) auf `main` (siehe Ablauf).
-- Externe Beiträge kommen nur als Pull Request aus einem **Fork** gegen `develop`
-  (siehe `CONTRIBUTING.md`) und werden auf GitHub per „Squash and merge“ übernommen.
+- Before merging, a feature/bugfix branch is **rebased** onto the current `develop`
+  (`git rebase develop`); `develop` is never merged into the branch.
+- It lands on `develop` as **exactly one squash commit**. Subject in Conventional Commits
+  format with the branch number at the end: `feat(render): add texture mapping (GEO-30)`.
+  The body summarises the change and names the new tests.
+- Releases and hotfixes reach `main` by **fast-forward** (`--ff-only`) (see Workflow).
+- External contributions arrive only as pull requests from a **fork** against `develop`
+  (see `CONTRIBUTING.md`) and are merged on GitHub with "Squash and merge".
 
-## Unterstützende Branches
+## Supporting branches
 
-| Typ        | Abzweig von | Merge nach                     | Name                          | Wofür |
-|------------|-------------|--------------------------------|-------------------------------|-------|
-| Feature    | `develop`   | `develop`                      | `feature/GEO-<nr>-<kurzname>` | Neue Funktion, Refactoring, Tooling, Doku |
-| Bugfix     | `develop`   | `develop`                      | `bugfix/GEO-<nr>-<kurzname>`  | Fehler, der noch **nicht** veröffentlicht ist |
-| Release    | `develop`   | `main` **und** `develop` (ff)  | `release/<X.Y.Z>`             | Version vorbereiten: Versionsnummer, CHANGELOG, letzte Fixes |
-| Hotfix     | `main`      | `main` (ff) **und** `develop`* | `hotfix/<X.Y.Z>`              | Dringender Fix einer veröffentlichten Version |
-| Support    | `main`      | –                              | `support/<X.Y>`               | Nur falls eine alte Major-Version gepflegt werden muss |
+| Type     | Branches off | Merges into                     | Name                            | Used for |
+|----------|--------------|---------------------------------|---------------------------------|----------|
+| Feature  | `develop`    | `develop`                       | `feature/GEO-<nr>-<short-name>` | New functionality, refactoring, tooling, docs |
+| Bugfix   | `develop`    | `develop`                       | `bugfix/GEO-<nr>-<short-name>`  | A bug that is **not** released yet |
+| Release  | `develop`    | `main` **and** `develop` (ff)   | `release/<X.Y.Z>`               | Prepare a version: version number, CHANGELOG, last fixes |
+| Hotfix   | `main`       | `main` (ff) **and** `develop`\* | `hotfix/<X.Y.Z>`                | Urgent fix of a released version |
+| Support  | `main`       | –                               | `support/<X.Y>`                 | Only if an old major version has to be maintained |
 
-\* Nach `develop` per Cherry-Pick. Läuft gerade ein `release/*`-Branch, wird der Hotfix stattdessen dort hinein übernommen.
+\* Into `develop` by cherry-pick. If a `release/*` branch is open, the hotfix goes there instead.
 
-### Namensregeln
+### Naming rules
 
-- `<nr>` ist fortlaufend und eindeutig (GEO-1, GEO-2, …). Vergeben ist eine Nummer, sobald sie
-  in **irgendeinem** Branch (auch remote und gelöscht) oder Commit-Betreff vorkommt. Höchste Nummer:
+- `<nr>` is sequential and unique (GEO-1, GEO-2, …). A number is taken as soon as it appears
+  in **any** branch (including remote and deleted ones) or commit subject. Highest number:
   ```bash
   { git ls-remote --heads origin; git branch -a; git log --all --format=%s; } \
     | grep -oiE 'GEO[-_][0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1
   ```
-  Bekannte Altlast: GEO-08 ist doppelt vergeben (`feature/GEO-08_Fixing_TS_Stuff` von 2022 und
+  Known legacy: GEO-08 is used twice (`feature/GEO-08_Fixing_TS_Stuff` from 2022 and
   `feature/GEO-08-workflow-rules`).
-- `<kurzname>` in kebab-case, englisch, knapp: `feature/GEO-12-math-core`.
-- Versionen folgen **SemVer**. Vor 1.0.0 dürfen Minor-Versionen brechende Änderungen enthalten.
+- `<short-name>` in kebab-case, English, short: `feature/GEO-12-math-core`.
+- Versions follow **SemVer**. Before 1.0.0, minor versions may contain breaking changes.
 
-## Legacy-Branches
+## Legacy branches
 
-Eingefrorene Branches aus der Zeit vor v0.1.0. Sie bleiben zu Archivzwecken bestehen,
-enthalten eine `LEGACY.md` und werden **nie** gemergt, rebased oder weiterentwickelt –
-sie bauen auf der alten API auf, die mit v0.1.0 ersetzt wurde.
+Frozen branches from before v0.1.0. They are kept for archival purposes, contain a
+`LEGACY.md` and are **never** merged, rebased or developed further – they are built on
+the old API that was replaced in v0.1.0.
 
-| Branch                             | Stand      | Inhalt                                        |
+| Branch                             | Date       | Content                                       |
 |------------------------------------|------------|-----------------------------------------------|
-| `feature/GEO-08_Fixing_TS_Stuff`   | 2023-01-14 | TS-Fixes/Refactoring der alten API            |
-| `feature/subdivide`                | 2023-05-31 | Unterteilung für `Geo3D` (alte API)           |
+| `feature/GEO-08_Fixing_TS_Stuff`   | 2023-01-14 | TS fixes/refactoring of the old API           |
+| `feature/subdivide`                | 2023-05-31 | Subdivision for `Geo3D` (old API)             |
 
-Ideen daraus werden – falls gewünscht – in einem neuen `feature/GEO-<nr>-…` von `develop`
-neu umgesetzt. Neue Legacy-Branches: `LEGACY.md` committen und hier eintragen.
+Ideas from them are – if wanted – re-implemented in a new `feature/GEO-<nr>-…` from
+`develop`. New legacy branches: commit a `LEGACY.md` and list them here.
 
-## Ablauf
+## Workflow
 
 ```bash
-# Feature starten
+# Start a feature
 git checkout develop && git pull
 git checkout -b feature/GEO-12-math-core
 
-# … committen …
+# … commit …
 
-# Feature abschließen
+# Finish a feature
 npm run typecheck && npm test && npm run build
-git push -u origin feature/GEO-12-math-core      # IMMER vor dem Merge pushen → CI läuft auf dem Branch
-# … CI-Lauf des Branches abwarten; bei Rot fixen und erneut pushen, nicht mergen …
+git push -u origin feature/GEO-12-math-core      # ALWAYS push before merging → CI runs on the branch
+# … wait for the branch's CI run; if red, fix and push again, do not merge …
 git checkout develop && git pull
-git checkout feature/GEO-12-math-core && git rebase develop   # bei neuem develop: rebasen, erneut pushen
-git push --force-with-lease                                    # (nur der eigene Feature-Branch!) und CI abwarten
+git checkout feature/GEO-12-math-core && git rebase develop   # if develop moved: rebase, push again
+git push --force-with-lease                                    # (own feature branch only!) and wait for CI
 git checkout develop
 git merge --squash feature/GEO-12-math-core
-git commit -m "feat(math): add math core (GEO-12)" -m "…Zusammenfassung, neue Tests…"
+git commit -m "feat(math): add math core (GEO-12)" -m "…summary, new tests…"
 git push origin develop
-git branch -D feature/GEO-12-math-core              # -D: nach Squash ist der Branch nicht „gemergt“
-git push origin --delete feature/GEO-12-math-core   # Remote-Branch nach dem Merge aufräumen
+git branch -D feature/GEO-12-math-core              # -D: after a squash the branch is not "merged"
+git push origin --delete feature/GEO-12-math-core   # clean up the remote branch after the merge
 
 # Release
 git checkout -b release/0.2.0 develop
-npm version 0.2.0 --no-git-tag-version   # CHANGELOG: [Unreleased] → [0.2.0] - JJJJ-MM-TT
+npm version 0.2.0 --no-git-tag-version   # CHANGELOG: [Unreleased] → [0.2.0] - YYYY-MM-DD
 git commit -am "chore(release): 0.2.0"
 git checkout main    && git merge --ff-only release/0.2.0 && git tag -a v0.2.0 -m "v0.2.0"
 git checkout develop && git merge --ff-only release/0.2.0
 git branch -d release/0.2.0
-# Geht --ff-only auf main nicht (main hat seit dem letzten Release einen Hotfix):
+# If --ff-only on main is not possible (main got a hotfix since the last release):
 #   git merge --squash release/0.2.0 && git commit -m 'chore(release): 0.2.0'
 
 # Hotfix
 git checkout -b hotfix/0.2.1 main
-# … Fix + Versionsnummer + CHANGELOG …
-# Hotfix-Branch hat genau einen Commit (vorher ggf. squashen)
+# … fix + version number + CHANGELOG …
+# The hotfix branch has exactly one commit (squash it first if needed)
 git checkout main    && git merge --ff-only hotfix/0.2.1 && git tag -a v0.2.1 -m "v0.2.1"
 git checkout develop && git cherry-pick hotfix/0.2.1
 ```
 
-Mit installiertem `git-flow`-CLI (AVH) für Start und Namen: `git flow init -d`, dann
-`git flow feature start GEO-12-math-core` (abschließen per Squash wie oben, nicht `feature finish`),
-`git flow release start 0.2.0`, `git flow hotfix start 0.2.1`
-(Präfixe: `feature/`, `bugfix/`, `release/`, `hotfix/`, `support/`, Tag-Präfix `v`).
+With the `git-flow` CLI (AVH) installed, for starting branches and naming: `git flow init -d`,
+then `git flow feature start GEO-12-math-core` (finish with a squash as above, not
+`feature finish`), `git flow release start 0.2.0`, `git flow hotfix start 0.2.1`
+(prefixes: `feature/`, `bugfix/`, `release/`, `hotfix/`, `support/`, tag prefix `v`).
 
 ## Commits
 
-- **Conventional Commits**, Betreff englisch im Imperativ, max. ~72 Zeichen:
+- **Conventional Commits**, subject in English, imperative mood, at most ~72 characters:
   `feat(math): add Mat4.lookAt`, `fix(svg): disable default fill`,
   `refactor:`, `test:`, `docs:`, `build:`, `ci:`, `chore:`.
-- Brechende Änderungen: `feat!:` bzw. Footer `BREAKING CHANGE: …`.
-- Ein Commit = eine logische Änderung. Typecheck und Tests sollen nach jedem Commit grün sein.
+- Breaking changes: `feat!:` or a footer `BREAKING CHANGE: …`.
+- One commit = one logical change. Typecheck and tests should be green after every commit.
 
-### Autor und Commit-Footer (verbindlich, auch für KI-Agenten)
+### Author and commit footer (mandatory, also for AI agents)
 
-- Autor **und** Committer jedes Commits: **`Jan <log@janwalenda.de>`** – keine andere Identität,
-  auch nicht die des Agenten. Vor dem ersten Commit einer Sitzung prüfen bzw. setzen:
+- Author **and** committer of every commit: **`Jan <log@janwalenda.de>`** – no other identity,
+  not even the agent's. Check or set it before the first commit of a session:
   `git config user.name "Jan" && git config user.email "log@janwalenda.de"`.
-- **Keine** `Co-Authored-By:`-Zeilen in Commit-Nachrichten (auch nicht für Claude/Cursor).
-- Gilt ebenso für Squash-Commits und Tags (Tagger = Jan).
+- **No** `Co-Authored-By:` lines in commit messages (not for Claude/Cursor either).
+- Applies to squash commits and tags as well (tagger = Jan).
 
-## Regeln für KI-Agenten (Claude Code, Cursor)
+## Rules for AI agents (Claude Code, Cursor)
 
-- Vor jeder Änderung prüfen, auf welchem Branch du bist. Für neue Arbeit **immer**
-  einen passenden `feature/`- oder `bugfix/`-Branch von `develop` anlegen.
-  Zusammenhängender Code gehört in **einen** Branch; Unzusammenhängendes in getrennte.
-- **Kein Feature und kein Fix ohne Tests** – siehe `testing.mdc`. Ein `feature/`- oder `bugfix/`-Branch,
-  der Code ändert, wird ohne passende neue/angepasste Tests nicht nach `develop` gemergt.
-- Vor dem Merge nach `develop`: `npm run typecheck && npm test && npm run build` müssen grün sein.
-- **Jeder `feature/`-, `bugfix/`- und `hotfix/`-Branch wird vor dem Merge gepusht**
-  (`git push -u origin <branch>`), damit er auf GitHub sichtbar ist und die CI darauf läuft.
-  Erst mergen, wenn der CI-Lauf des Branches grün ist. Gilt auch für reine Doku-/Regel-Branches.
-- Nach dem Merge den Branch lokal **und** remote löschen. Lässt die Umgebung das Löschen des
-  Remote-Branches nicht zu, den Nutzer darauf hinweisen statt es zu umgehen.
-- **Nie** auf `main` pushen, Releases abschließen, Tags pushen oder `npm publish`
-  ausführen ohne ausdrückliche Freigabe des Nutzers.
-- **Nie** `develop` oder `main` force-pushen oder deren Historie umschreiben. Force-Push
-  (`--force-with-lease`) nur auf den eigenen Feature-/Bugfix-Branch nach einem Rebase.
-- Externe Pull Requests (aus Forks) nie lokal ausführen, bevor der Diff gelesen wurde –
-  besonders Änderungen an `.github/`, `package.json`, Lockfile, Build- und Testkonfiguration.
+- Before any change, check which branch you are on. For new work **always** create a
+  matching `feature/` or `bugfix/` branch from `develop`.
+  Related code belongs in **one** branch; unrelated changes in separate ones.
+- **No feature and no fix without tests** – see `testing.mdc`. A `feature/` or `bugfix/` branch
+  that changes code is not merged into `develop` without matching new/updated tests.
+- Before merging into `develop`: `npm run typecheck && npm test && npm run build` must be green.
+- **Every `feature/`, `bugfix/` and `hotfix/` branch is pushed before it is merged**
+  (`git push -u origin <branch>`), so it is visible on GitHub and CI runs on it.
+  Merge only once the branch's CI run is green. Also applies to docs/rules-only branches.
+- After the merge, delete the branch locally **and** on the remote. If the environment does not
+  allow deleting the remote branch, tell the user instead of working around it.
+- **Never** push to `main`, finish releases, push tags or run `npm publish`
+  without the user's explicit approval.
+- **Never** force-push `develop` or `main` or rewrite their history. Force-push
+  (`--force-with-lease`) only to your own feature/bugfix branch after a rebase.
+- Never run external pull requests (from forks) locally before reading the diff –
+  especially changes to `.github/`, `package.json`, the lockfile, build and test configuration.

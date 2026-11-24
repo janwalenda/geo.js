@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-Die Projektregeln liegen als einzige Quelle in `.cursor/rules/*.mdc`, damit Claude Code
-und Cursor dieselben Regeln verwenden. Änderungen an Regeln **nur dort** vornehmen –
-diese Datei bindet sie lediglich ein. Neue `.mdc`-Datei → hier eine Import-Zeile ergänzen.
+The project rules live in a single place, `.cursor/rules/*.mdc`, so that Claude Code
+and Cursor use the same rules. Change rules **only there** – this file just imports
+them. New `.mdc` file → add an import line here.
 
 @.cursor/rules/git-flow.mdc
 @.cursor/rules/project.mdc

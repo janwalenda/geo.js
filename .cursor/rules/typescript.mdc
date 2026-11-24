@@ -1,19 +1,19 @@
 ---
-description: TypeScript- und Code-Konventionen für den Quellcode von geo.js
+description: TypeScript and code conventions for the geo.js source code
 globs: src/**/*.ts, demo/**/*.ts
 alwaysApply: false
 ---
 
-# TypeScript-Konventionen
+# TypeScript conventions
 
-- `strict` ist an; kein `any` (stattdessen `unknown` + Type Guard). Kein `!`-Non-Null-Assertion,
-  wenn sich der Fall sauber prüfen lässt.
-- ES-Module, benannte Exporte, **keine** Default-Exporte. Eine Klasse pro Datei,
-  Dateiname = Klassenname (`Mat4.ts`). Jeder Ordner hat ein `index.ts`.
-- Code, Bezeichner und Kommentare auf Englisch. JSDoc an jeder öffentlichen Klasse/Methode,
-  inkl. Einheit (Radiant, Pixel) und ob das Objekt verändert wird.
-- Optionen-Objekte statt langer Parameterlisten; Optionen haben sinnvolle Defaults
-  (`interface FooOptions` + `Partial`/Defaults im Konstruktor).
-- Keine Seiteneffekte beim Import (Paket ist `sideEffects: false`).
-- Kein `console.log` im Bibliothekscode.
-- Formatierung: 4 Leerzeichen, einfache Anführungszeichen, Semikolons.
+- `strict` is on; no `any` (use `unknown` + a type guard instead). No `!` non-null assertion
+  when the case can be checked properly.
+- ES modules, named exports, **no** default exports. One class per file,
+  file name = class name (`Mat4.ts`). Every folder has an `index.ts`.
+- Code, identifiers, comments and JSDoc in **English**. JSDoc on every public class/method,
+  incl. the unit (radians, pixels) and whether the object is mutated.
+- Options objects instead of long parameter lists; options have sensible defaults
+  (`interface FooOptions` + `Partial`/defaults in the constructor).
+- No side effects on import (the package is `sideEffects: false`).
+- No `console.log` in library code.
+- Formatting: 4 spaces, single quotes, semicolons.

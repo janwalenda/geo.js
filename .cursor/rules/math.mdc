@@ -1,27 +1,27 @@
 ---
-description: Mathematische Konventionen (Koordinatensystem, Matrizen, Winkel) der Engine
+description: Mathematical conventions (coordinate system, matrices, angles) of the engine
 globs: src/math/**/*.ts, src/scene/**/*.ts, src/geometry/**/*.ts, src/render/**/*.ts
 alwaysApply: false
 ---
 
-# Mathematische Konventionen
+# Mathematical conventions
 
-Diese Konventionen gelten überall – Abweichungen sind Bugs.
+These conventions apply everywhere – deviations are bugs.
 
-- **Rechtshändiges Koordinatensystem**, `+Y` oben, `+X` rechts, die Kamera schaut entlang `-Z`
-  (wie OpenGL/WebGL).
-- **Winkel immer in Radiant.** Umrechnung nur über `degToRad` / `radToDeg`.
-  Einzige Ausnahme: `PerspectiveCamera.fov` (vertikal, in Grad, wie üblich).
-- **Matrizen spaltenweise (column-major)** in `elements` gespeichert:
-  `elements[col * 4 + row]`. Vektoren sind Spaltenvektoren: `v' = M · v`.
-  `a.multiply(b)` bedeutet `a = a · b` (b wird zuerst angewendet), `premultiply(b)` bedeutet `a = b · a`.
-- Transformationsreihenfolge eines Objekts: `M = T · R · S`.
-  Welt-Matrix: `world = parent.world · local`.
-- **Clip-Raum wie OpenGL:** NDC `x, y, z ∈ [-1, 1]`. Bildschirm: `x = (ndc.x + 1) / 2 · width`,
-  `y = (1 - ndc.y) / 2 · height` (Y wird gespiegelt).
-- **Vorderseite = gegen den Uhrzeigersinn (CCW)**, von außen betrachtet. Geometrie-Generatoren
-  müssen nach außen zeigende Normalen liefern (es gibt Tests dafür).
-- Vektor-/Matrix-Methoden **verändern `this`** und geben `this` zurück (verkettbar).
-  Wer das Original braucht, ruft vorher `.clone()` auf. Statische Helfer erzeugen neue Objekte.
-- Gleitkomma-Vergleiche nur mit Toleranz (`EPSILON = 1e-6`, `approxEqual`).
-- Keine Allokationen in heißen Schleifen der Pipeline, wenn ein Scratch-Objekt reicht.
+- **Right-handed coordinate system**, `+Y` up, `+X` right, the camera looks along `-Z`
+  (as in OpenGL/WebGL).
+- **Angles are always in radians.** Convert only through `degToRad` / `radToDeg`.
+  Only exception: `PerspectiveCamera.fov` (vertical, in degrees, as usual).
+- **Matrices are stored column-major** in `elements`:
+  `elements[col * 4 + row]`. Vectors are column vectors: `v' = M · v`.
+  `a.multiply(b)` means `a = a · b` (b is applied first), `premultiply(b)` means `a = b · a`.
+- Transformation order of an object: `M = T · R · S`.
+  World matrix: `world = parent.world · local`.
+- **Clip space as in OpenGL:** NDC `x, y, z ∈ [-1, 1]`. Screen: `x = (ndc.x + 1) / 2 · width`,
+  `y = (1 - ndc.y) / 2 · height` (Y is flipped).
+- **Front face = counter-clockwise (CCW)**, seen from outside. Geometry generators
+  must produce outward-facing normals (there are tests for this).
+- Vector/matrix methods **mutate `this`** and return `this` (chainable).
+  Whoever needs the original calls `.clone()` first. Static helpers create new objects.
+- Floating-point comparisons only with a tolerance (`EPSILON = 1e-6`, `approxEqual`).
+- No allocations in hot loops of the pipeline when a scratch object is enough.

@@ -1,43 +1,43 @@
 ---
-description: Testpflicht und Test-Konventionen (Vitest) für geo.js
+description: Test requirements and test conventions (Vitest) for geo.js
 globs: test/**/*
 alwaysApply: true
 ---
 
 # Tests
 
-## Testpflicht: zu jedem Feature und jedem Fix gehören Tests
+## Every feature and every fix comes with tests
 
-Jeder `feature/`-, `bugfix/`- und `hotfix/`-Branch, der Code ändert, enthält im **selben Branch**
-die dazugehörigen Tests. Ohne Tests kein Merge.
+Every `feature/`, `bugfix/` and `hotfix/` branch that changes code contains the matching
+tests in the **same branch**. No tests, no merge.
 
-| Änderung                       | Erforderliche Tests |
-|--------------------------------|---------------------|
-| Neues Feature / neue API       | Unit-Tests für das neue Verhalten inkl. Rand- und Fehlerfällen |
-| Bugfix / Hotfix                | Regressionstest, der **ohne den Fix fehlschlägt** und mit Fix grün ist |
-| Mathe / Geometrie              | bekannte Werte **und** Invarianten (siehe unten) |
-| Renderer / sichtbare Ausgabe   | jsdom-/Mock-Test der Ausgabe **plus** Browser-Check (Playwright): Canvas und SVG vergleichen, Screenshot ansehen |
-| Öffentliche API / README       | `test/readme.test.ts` bzw. `test/dist/verify-dist.mjs` anpassen |
-| Refactoring ohne Verhaltensänderung | bestehende Tests bleiben unverändert grün; fehlende Abdeckung vorher ergänzen |
+| Change                          | Required tests |
+|---------------------------------|----------------|
+| New feature / new API           | Unit tests for the new behaviour incl. edge and error cases |
+| Bugfix / hotfix                 | Regression test that **fails without the fix** and passes with it |
+| Math / geometry                 | known values **and** invariants (see below) |
+| Renderer / visible output       | jsdom/mock test of the output **plus** a browser check (Playwright or Chrome DevTools): compare Canvas and SVG, look at a screenshot |
+| Public API / README             | update `test/readme.test.ts` or `test/dist/verify-dist.mjs` |
+| Refactoring without behaviour change | existing tests stay green unchanged; add missing coverage first |
 
-Ausnahme: reine Doku-/Regel-/CI-Änderungen ohne Code – dort nur `npm test` grün halten.
+Exception: docs/rules/CI-only changes without code – there, only keep `npm test` green.
 
-Vorgehen bei Fixes: erst den fehlschlagenden Test schreiben und rot sehen, dann fixen.
-Im Merge-/Commit-Text bzw. in der Antwort an den Nutzer nennen, welche Tests hinzugekommen sind.
+Fixing bugs: write the failing test first and see it red, then fix.
+Name the added tests in the merge/commit text and in the answer to the user.
 
-## Konventionen
+## Conventions
 
-- **Alle Tests liegen im Ordner `test/`** – niemals in `src/`, `demo/` oder anderswo.
-  Die Struktur spiegelt `src/`: `src/math/Mat4.ts` → `test/math/Mat4.test.ts`,
+- **All tests live in `test/`** – never in `src/`, `demo/` or anywhere else.
+  The structure mirrors `src/`: `src/math/Mat4.ts` → `test/math/Mat4.test.ts`,
   `src/renderers/SVGRenderer.ts` → `test/renderers/svg.test.ts`.
-  `test/structure.test.ts` schlägt fehl, sobald eine Testdatei außerhalb von `test/` liegt;
-  Vitest führt ohnehin nur `test/**/*.test.ts` aus.
-- Gemeinsame Helfer in `test/helpers.ts`, Bundle-Smoke-Test in `test/dist/verify-dist.mjs`,
-  README-Beispiele in `test/readme.test.ts`. Imports auf den Code immer über `../../src/…`.
-- **Vitest**. Standard-Umgebung ist Node. Tests, die DOM brauchen (nur `test/renderers/`), setzen
-  am Dateianfang `// @vitest-environment jsdom`.
-- Mathe immer gegen bekannte Werte **und** Eigenschaften testen
-  (z. B. `M · M⁻¹ = I`, Rotation erhält Länge, Normalen zeigen nach außen).
-- Fließkomma mit `toBeCloseTo` bzw. dem Helfer `expectVec` vergleichen, nie mit `toBe`.
-- Jeder Bugfix bekommt einen Test, der ohne den Fix fehlschlägt.
-- `npm test` muss vor jedem Merge nach `develop` grün sein.
+  `test/structure.test.ts` fails as soon as a test file is outside `test/`;
+  Vitest only runs `test/**/*.test.ts` anyway.
+- Shared helpers in `test/helpers.ts`, bundle smoke test in `test/dist/verify-dist.mjs`,
+  README examples in `test/readme.test.ts`. Always import code via `../../src/…`.
+- **Vitest**. The default environment is Node. Tests that need a DOM (only `test/renderers/`)
+  start with `// @vitest-environment jsdom`.
+- Always test math against known values **and** properties
+  (e.g. `M · M⁻¹ = I`, rotation preserves length, normals point outwards).
+- Compare floats with `toBeCloseTo` or the `expectVec` helper, never with `toBe`.
+- Every bug fix gets a test that fails without the fix.
+- `npm test` must be green before every merge into `develop`.
