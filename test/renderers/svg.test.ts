@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BoxGeometry } from '../../src/geometry';
 import { Vec3 } from '../../src/math';
-import type { DisplayList } from '../../src/render';
+import type { DisplayList, ImagePrimitive, PolygonPrimitive } from '../../src/render';
 import { Material, Mesh, PerspectiveCamera, Scene } from '../../src/scene';
 import { SVGRenderer } from '../../src/renderers/SVGRenderer';
 import { toSVGString } from '../../src/renderers/svgMarkup';
@@ -45,7 +45,7 @@ describe('SVGRenderer', () => {
         const renderer = new SVGRenderer({ width: 100, height: 50 });
         renderer.draw(list);
         const first = renderer.domElement.children[1];
-        renderer.draw({ ...list, primitives: [{ ...list.primitives[0], fill: '#0000ff' }] });
+        renderer.draw({ ...list, primitives: [{ ...(list.primitives[0] as PolygonPrimitive), fill: '#0000ff' }] });
         expect(renderer.domElement.children).toHaveLength(2);
         expect(renderer.domElement.children[1]).toBe(first);
         expect(first.getAttribute('fill')).toBe('#0000ff');
@@ -137,5 +137,49 @@ describe('SVGRenderer export', () => {
         expect(await blobs[0].text()).toBe(toSVGString(list));
         vi.runAllTimers();
         expect(revoke).toHaveBeenCalledWith('blob:geo-svg');
+    });
+});
+
+describe('textures in SVG', () => {
+    const image: ImagePrimitive = {
+        type: 'image', src: 'tex.png', transform: [100, 0, 0, 50, 5, 7], points: [5, 7, 105, 7, 5, 57], opacity: 0.5, depth: 1,
+    };
+    const textured: DisplayList = { width: 100, height: 50, background: null, primitives: [image, { ...image }] };
+
+    it('serializes one shared <image> per texture and a clipped <use> per piece', () => {
+        const svg = toSVGString(textured);
+        expect(svg.match(/<image /g)).toHaveLength(1);
+        expect(svg).toContain('<defs><image id="geo-tex-0" href="tex.png" width="1" height="1" preserveAspectRatio="none"/></defs>');
+        expect(svg).toContain('<clipPath id="geo-clip-0"><polygon points="5,7 105,7 5,57"/></clipPath>');
+        expect(svg).toContain('<g clip-path="url(#geo-clip-0)" opacity="0.5"><use href="#geo-tex-0" transform="matrix(100 0 0 50 5 7)"/></g>');
+        expect(svg).toContain('geo-clip-1');
+    });
+
+    it('omits <defs> when nothing is textured', () => {
+        expect(toSVGString(list)).not.toContain('<defs');
+    });
+
+    it('creates <defs> lazily in the DOM renderer, with ids unique per renderer, and reuses pieces', () => {
+        const a = new SVGRenderer({ width: 100, height: 50 });
+        const b = new SVGRenderer({ width: 100, height: 50 });
+        a.draw(list);
+        expect(a.domElement.querySelector('defs')).toBeNull();
+        a.draw(textured);
+        b.draw(textured);
+        const defs = a.domElement.firstElementChild;
+        expect(defs?.tagName).toBe('defs');
+        expect(defs?.children).toHaveLength(1);
+        const idA = a.domElement.querySelector('image')?.id;
+        expect(idA).toBeTruthy();
+        expect(idA).not.toBe(b.domElement.querySelector('image')?.id);
+
+        const piece = a.domElement.children[1];
+        const use = piece.querySelector('use');
+        a.draw({ ...textured, primitives: [{ ...image, transform: [50, 0, 0, 50, 0, 0] }] });
+        expect(a.domElement.children[1]).toBe(piece);
+        expect(piece.querySelector('use')).toBe(use);
+        expect(use?.getAttribute('transform')).toBe('matrix(50 0 0 50 0 0)');
+        expect(use?.getAttribute('href')).toBe(`#${idA}`);
+        expect(a.domElement.children).toHaveLength(2); // defs + one piece
     });
 });

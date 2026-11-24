@@ -30,7 +30,7 @@ describe('README examples', () => {
         ball.rotation.setFromEuler(0, 1, 0);
         const list = compile(scene, camera, { width: 640, height: 480 });
         expect(list.primitives.length).toBeGreaterThan(100);
-        expect(new Set(list.primitives.map((p) => p.fill)).size).toBeGreaterThan(10); // shaded
+        expect(new Set(list.primitives.map((p) => ('fill' in p ? p.fill : null))).size).toBeGreaterThan(10); // shaded
     });
 
     it('2D and surface examples build', () => {

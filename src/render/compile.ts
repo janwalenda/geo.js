@@ -12,6 +12,7 @@ import { Points } from '../scene/Points';
 import { Polyline } from '../scene/Polyline';
 import { Scene } from '../scene/Scene';
 import type { DisplayList, Primitive, PrimitiveStyle } from './DisplayList';
+import { affineFromTriangle, autoTextureDetail, inflatePolygon } from './textureMapping';
 
 export interface CompileOptions {
     /** Viewport width in CSS pixels. */
@@ -46,6 +47,7 @@ interface Context {
 }
 
 const BLACK = new Color(0, 0, 0);
+const WHITE = new Color(1, 1, 1);
 const clip = new Vec4();
 
 /**
@@ -120,19 +122,24 @@ function collectLights(scene: Object3D): Lights {
 
 function compileMesh(mesh: Mesh, ctx: Context, out: Primitive[]): void {
     const { geometry, material } = mesh;
+    const uvs = material.map && !material.wireframe ? geometry.uvs : null;
     const world = geometry.vertices.map((v) => v.clone().applyMat4(mesh.worldMatrix));
     const view = world.map((v) => v.clone().applyMat4(ctx.view));
     const normal = new Vec3();
     const center = new Vec3();
 
-    for (const face of geometry.faces) {
+    for (let f = 0; f < geometry.faces.length; f++) {
+        const face = geometry.faces[f];
         if (face.length < 3) continue;
         newellNormal(world, face, normal);
         if (normal.lengthSq() === 0) continue; // degenerate face
 
         const polygon = face.map((i) => view[i]);
         if (polygon.every((p) => p.z < -ctx.far)) continue;
-        const clipped = clipPolygonNear(polygon, ctx.near);
+        const faceUVs = uvs?.[f];
+        const corners: Corner[] = face.map((i, k) => ({ p: view[i], uv: faceUVs?.[k] ?? ZERO_UV }));
+        const clippedCorners = clipCornersNear(corners, ctx.near);
+        const clipped = clippedCorners.map((c) => c.p);
         if (clipped.length < 3) continue;
 
         const points = projectAll(clipped, ctx);
@@ -150,13 +157,102 @@ function compileMesh(mesh: Mesh, ctx: Context, out: Primitive[]): void {
         for (const i of face) center.add(world[i]);
         center.scale(1 / face.length);
 
+        const depth = averageDistance(clipped);
+        if (material.map && faceUVs && faceUVs.length === face.length) {
+            compileTexturedFace(material, material.map.src, clippedCorners, points, depth, normal, center, ctx, out);
+            continue;
+        }
+        out.push({ type: 'polygon', points, depth, ...faceStyle(material, normal, center, ctx) });
+    }
+}
+
+/** View-space polygon corner with its texture coordinate. */
+interface Corner {
+    p: Vec3;
+    uv: Vec2;
+}
+
+const ZERO_UV = new Vec2(0, 0);
+
+/**
+ * Emit a textured face: fan-triangulate the (near-clipped) polygon, subdivide each
+ * triangle against affine distortion and map the texture onto every piece. Lighting
+ * is a black overlay over the whole face whose opacity darkens it like flat shading.
+ * All pieces share the face depth, so sorting keeps them together and in order.
+ */
+function compileTexturedFace(
+    material: Material, src: string, corners: Corner[], points: number[], depth: number,
+    normal: Vec3, center: Vec3, ctx: Context, out: Primitive[],
+): void {
+    const opacity = material.opacity;
+    const inflate = ctx.seams;
+
+    for (let k = 1; k < corners.length - 1; k++) {
+        const a = corners[0], b = corners[k], c = corners[k + 1];
+        const n = material.textureDetail === 'auto'
+            ? autoTextureDetail(Math.min(-a.p.z, -b.p.z, -c.p.z), Math.max(-a.p.z, -b.p.z, -c.p.z))
+            : Math.max(1, Math.floor(material.textureDetail));
+        // Barycentric grid: corner (i, j) = a + (b − a)·i/n + (c − a)·j/n, for i + j ≤ n.
+        const at = (i: number, j: number): Corner => {
+            const s = i / n, t = j / n;
+            return {
+                p: new Vec3(
+                    a.p.x + (b.p.x - a.p.x) * s + (c.p.x - a.p.x) * t,
+                    a.p.y + (b.p.y - a.p.y) * s + (c.p.y - a.p.y) * t,
+                    a.p.z + (b.p.z - a.p.z) * s + (c.p.z - a.p.z) * t,
+                ),
+                uv: new Vec2(
+                    a.uv.x + (b.uv.x - a.uv.x) * s + (c.uv.x - a.uv.x) * t,
+                    a.uv.y + (b.uv.y - a.uv.y) * s + (c.uv.y - a.uv.y) * t,
+                ),
+            };
+        };
+        const grid: Corner[][] = [];
+        for (let i = 0; i <= n; i++) {
+            grid.push([]);
+            for (let j = 0; i + j <= n; j++) grid[i].push(at(i, j));
+        }
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; i + j < n; j++) {
+                pushTexturedTriangle(grid[i][j], grid[i + 1][j], grid[i][j + 1], src, opacity, depth, inflate, ctx, out);
+                if (i + j + 1 < n) {
+                    pushTexturedTriangle(grid[i + 1][j], grid[i + 1][j + 1], grid[i][j + 1], src, opacity, depth, inflate, ctx, out);
+                }
+            }
+        }
+    }
+
+    if (material.lit && ctx.lights.any) {
+        const light = shade(WHITE, normal, center, ctx.lights);
+        const brightness = Math.min(1, (light.r + light.g + light.b) / 3);
+        if (brightness < 0.999) {
+            out.push({
+                type: 'polygon',
+                points: inflatePolygon(points, inflate),
+                depth,
+                fill: '#000000',
+                stroke: null,
+                lineWidth: 0,
+                opacity: (1 - brightness) * opacity,
+            });
+        }
+    }
+    if (material.stroke) {
         out.push({
-            type: 'polygon',
-            points,
-            depth: averageDistance(clipped),
-            ...faceStyle(material, normal, center, ctx),
+            type: 'polygon', points, depth, fill: null,
+            stroke: material.stroke.toCSS(), lineWidth: material.lineWidth, opacity,
         });
     }
+}
+
+function pushTexturedTriangle(
+    a: Corner, b: Corner, c: Corner, src: string, opacity: number, depth: number,
+    inflate: number, ctx: Context, out: Primitive[],
+): void {
+    const xy = projectAll([a.p, b.p, c.p], ctx);
+    const transform = affineFromTriangle([a.uv.x, a.uv.y, b.uv.x, b.uv.y, c.uv.x, c.uv.y], xy);
+    if (!transform || signedArea(xy) === 0) return;
+    out.push({ type: 'image', src, transform, points: inflatePolygon(xy, inflate), opacity, depth });
 }
 
 function compilePolyline(line: Polyline, ctx: Context, out: Primitive[]): void {
@@ -273,18 +369,24 @@ function newellNormal(vertices: Vec3[], face: number[], out: Vec3): Vec3 {
     return out.normalize();
 }
 
-/** Sutherland–Hodgman against the near plane z = −near (view space, keep z ≤ −near). */
-function clipPolygonNear(polygon: Vec3[], near: number): Vec3[] {
+/**
+ * Sutherland–Hodgman against the near plane z = −near (view space, keep z ≤ −near).
+ * UVs are interpolated linearly along the cut edges, which is exact in view space.
+ */
+function clipCornersNear(polygon: Corner[], near: number): Corner[] {
     const limit = -near;
-    if (polygon.every((p) => p.z <= limit)) return polygon;
-    const result: Vec3[] = [];
+    if (polygon.every((c) => c.p.z <= limit)) return polygon;
+    const result: Corner[] = [];
     for (let i = 0; i < polygon.length; i++) {
         const a = polygon[i];
         const b = polygon[(i + 1) % polygon.length];
-        const aIn = a.z <= limit;
-        const bIn = b.z <= limit;
+        const aIn = a.p.z <= limit;
+        const bIn = b.p.z <= limit;
         if (aIn) result.push(a);
-        if (aIn !== bIn) result.push(a.clone().lerp(b, (limit - a.z) / (b.z - a.z)));
+        if (aIn !== bIn) {
+            const t = (limit - a.p.z) / (b.p.z - a.p.z);
+            result.push({ p: a.p.clone().lerp(b.p, t), uv: a.uv.clone().lerp(b.uv, t) });
+        }
     }
     return result;
 }

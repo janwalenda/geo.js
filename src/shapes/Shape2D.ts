@@ -1,6 +1,6 @@
 import { Mat3 } from '../math/Mat3';
 import { Vec2 } from '../math/Vec2';
-import type { Drawable, Primitive, PrimitiveStyle } from '../render/DisplayList';
+import type { Drawable, PrimitiveStyle, ShapePrimitive } from '../render/DisplayList';
 import { Color, type ColorLike } from '../scene/Color';
 
 /** A 2D point given as a vector, a tuple or any `{ x, y }` object. */
@@ -84,7 +84,7 @@ export abstract class Shape2D implements Drawable {
         };
     }
 
-    toPrimitives(): Primitive[] {
+    toPrimitives(): ShapePrimitive[] {
         if (!this.visible) return [];
         const points = this.points().flatMap((p) => [p.x, p.y]);
         if (points.length < 4) return [];

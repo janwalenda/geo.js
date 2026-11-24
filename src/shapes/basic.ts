@@ -1,5 +1,5 @@
 import { Vec2 } from '../math/Vec2';
-import type { Primitive } from '../render/DisplayList';
+import type { ShapePrimitive } from '../render/DisplayList';
 import { Shape2D, toVec2, type PointLike, type ShapeOptions } from './Shape2D';
 
 /** Closed polygon through the given local points. */
@@ -155,7 +155,7 @@ export class Circle extends Shape2D {
         return points;
     }
 
-    toPrimitives(): Primitive[] {
+    toPrimitives(): ShapePrimitive[] {
         if (this.visible && this.isFull && this.scale.x === this.scale.y) {
             return [{
                 type: 'circle',

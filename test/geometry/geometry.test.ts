@@ -111,3 +111,59 @@ describe('geometry generators', () => {
         expect(g.faceNormal(0).z).toBeGreaterThan(0);
     });
 });
+
+describe('UV coordinates', () => {
+    const withUVs: [string, Geometry][] = [
+        ['Plane', new PlaneGeometry(2, 1, 3, 2)],
+        ['Box', new BoxGeometry()],
+        ['UVSphere', new UVSphereGeometry(1, 8, 4)],
+        ['Torus', new TorusGeometry()],
+        ['Parametric', new ParametricGeometry((u, v) => new Vec3(u, v, 0), { slicesU: 2, slicesV: 2 })],
+    ];
+
+    it.each(withUVs)('%s has one UV per face corner, inside the unit square', (_, g) => {
+        expect(g.uvs).not.toBeNull();
+        expect(g.uvs?.length).toBe(g.faces.length);
+        g.faces.forEach((face, f) => {
+            expect(g.uvs?.[f].length).toBe(face.length);
+            for (const uv of g.uvs?.[f] ?? []) {
+                expect(uv.x).toBeGreaterThanOrEqual(0);
+                expect(uv.x).toBeLessThanOrEqual(1);
+                expect(uv.y).toBeGreaterThanOrEqual(0);
+                expect(uv.y).toBeLessThanOrEqual(1);
+            }
+        });
+    });
+
+    it('puts the top-left of the image at the top-left of a plane', () => {
+        const g = new PlaneGeometry(2, 2);
+        const corner = g.faces[0].findIndex((i) => g.vertices[i].x < 0 && g.vertices[i].y > 0);
+        expect([g.uvs?.[0][corner].x, g.uvs?.[0][corner].y]).toEqual([0, 0]);
+    });
+
+    it('orients textures unmirrored on the front side (image right × image down points into the surface)', () => {
+        for (const g of [new PlaneGeometry(), new ParametricGeometry((u, v) => new Vec3(u, v, 0), { slicesU: 1, slicesV: 1 })]) {
+            const [a, b, , d] = g.faces[0].map((i) => g.vertices[i]);
+            const [ua, ub, , ud] = g.uvs?.[0] ?? [];
+            // Face 0 is an axis-aligned quad: a→b runs along image u, a→d along image v.
+            const right = (ub.x > ua.x ? b : a).clone().sub(ub.x > ua.x ? a : b);
+            const down = (ud.y > ua.y ? d : a).clone().sub(ud.y > ua.y ? a : d);
+            expect(right.cross(down).dot(g.faceNormal(0))).toBeLessThan(0);
+        }
+    });
+
+    it('gives the sphere a seam: the last column ends at u = 0, not wrapping back to 1', () => {
+        const g = new UVSphereGeometry(1, 4, 2);
+        const us = (g.uvs ?? []).flat().map((uv) => uv.x);
+        expect(Math.min(...us)).toBe(0);
+        expect(Math.max(...us)).toBe(1);
+    });
+
+    it('has no UVs on generic geometries and clones copy them deeply', () => {
+        expect(new IcosahedronGeometry().uvs).toBeNull();
+        const g = new PlaneGeometry();
+        const copy = g.clone();
+        expect(copy.uvs).toEqual(g.uvs);
+        expect(copy.uvs?.[0][0]).not.toBe(g.uvs?.[0][0]);
+    });
+});
